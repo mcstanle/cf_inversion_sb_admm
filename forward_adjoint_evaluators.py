@@ -16,14 +16,14 @@ Last Modified : May 26, 2023
 """
 
 
-def forward_eval_unfold(K, x):
+def forward_eval_unfold(x, K):
     """
     Performs a forward evaluation for the unfolding problem.
 
     Parameters
     ----------
-        K (np arr) : m x p - forward model matrix
         x (np arr) : p x 1 - input vector
+        K (np arr) : m x p - forward model matrix
 
     Returns
     -------
@@ -32,14 +32,14 @@ def forward_eval_unfold(K, x):
     return K @ x
 
 
-def adjoint_eval_unfold(K, w):
+def adjoint_eval_unfold(w, K):
     """
     Performs an adjoint evaluation for the unfolding problem.
 
     Parameters
     ----------
-        K (np arr) : m x p - forward model matrix
         w (np arr) : m x 1 - input vector
+        K (np arr) : m x p - forward model matrix
 
     Returns
     -------

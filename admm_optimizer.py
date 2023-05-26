@@ -13,7 +13,7 @@ Comments
 1. The penalty parameter mu_k is provided instead of a strictly constant mu to
    provide the flexibility to dyanmically choose the penalty parameter, though
    this does not necessarily need to be the case.
-2. For the output of run_admm(), search "ADMM OUTPUT" 
+2. For the output of run_admm(), search "ADMM OUTPUT"
 ===============================================================================
 TODO:
 1. expand run_admm() to support non-constant mu
@@ -74,7 +74,7 @@ def w_update_obj(
 def w_update_obj_grad(
     w, lambda_k, c_k, mu_k, lep,
     psi_alpha, forward_eval, adjoint_eval,
-    y, A, h
+    y, A, b, h
 ):
     """
     Gradient of the above w suboptimization objective function.
@@ -93,7 +93,7 @@ def w_update_obj_grad(
         adjoint_eval (function) : returns K^T w, where K is lin. forward model
         y            (np arr)   : m x 1
         A            (np arr)   : d x p
-        b            (np arr)   : d x 1
+        b            (np arr)   : d x 1 -- NOTE not used here, for parallelism
         h            (np arr)   : p x 1
 
     Returns
@@ -106,7 +106,8 @@ def w_update_obj_grad(
     KTw = adjoint_eval(w)
 
     # construct input for forward model run
-    f_model_input = lambda_k - lep_switch * mu_k * KTw - mu_k * h - mu_k * A.T @ c_k
+    f_model_input = lambda_k - lep_switch * mu_k * KTw - mu_k * h
+    f_model_input -= mu_k * A.T @ c_k
 
     # evaluate the forward model
     Kx = forward_eval(f_model_input)
@@ -170,7 +171,7 @@ def c_update_obj_grad(
     return q - lep_switch * mu_k * A @ hAc
 
 
-def endpoint_objective(w, c, y, lep, psi_alpha):
+def endpoint_objective(w, c, b, y, lep, psi_alpha):
     """
     Interval endpoint objectives for both LEP and UEP
 
@@ -178,6 +179,7 @@ def endpoint_objective(w, c, y, lep, psi_alpha):
     ----------
         w            (np arr)   : m x 1
         c            (np arr)   : d x 1
+        b            (np arr)   : d x 1
         y            (np arr)   : m x 1
         lep          (bool)     : True means optimize the lower endpoint
         psi_alpha    (float)    :
@@ -187,7 +189,9 @@ def endpoint_objective(w, c, y, lep, psi_alpha):
         objective function evaluation (float)
     """
     lep_switch = -1 if lep else 1
-    return w @ y + lep_switch * psi_alpha * np.linalg.norm(w)
+    return_val = w @ y + lep_switch * psi_alpha * np.linalg.norm(w)
+    return_val += lep_switch * np.dot(b, c)
+    return return_val
 
 
 def run_admm(
@@ -263,7 +267,7 @@ def run_admm(
             args=(
                 lambda_k, c_k, mu, lep, psi_alpha,
                 forward_eval, adjoint_eval,
-                y, A, h
+                y, A, b, h
             ),
             method='BFGS',
             options={'maxiter': subopt_iters}
@@ -299,7 +303,9 @@ def run_admm(
 
         # save the objective function value
         f_admm_evals.append(
-            endpoint_objective(w=w_k, y=y, lep=lep, psi_alpha=psi_alpha)
+            endpoint_objective(
+                w=w_k, c=c_k, b=b, y=y, lep=lep, psi_alpha=psi_alpha
+            )
         )
 
         # save the optimized vectors

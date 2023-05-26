@@ -10,7 +10,12 @@ Last Modified : May 26, 2023
 ===============================================================================
 """
 from admm_optimizer import run_admm
+from functools import partial
 from forward_adjoint_evaluators import forward_eval_unfold, adjoint_eval_unfold
+import numpy as np
+import os
+import pickle
+from scipy import stats
 
 
 def get_KTwk1(w, K):
@@ -26,35 +31,130 @@ def get_KTwk1(w, K):
     -------
         K^T w (np arr) : p x 1
     """
-    pass
+    return K.T @ w
 
 
-def run_optimizer(forward_eval, adjoint_eval, lep):
+def run_optimizer(
+    y, A, b, h,
+    w_start, c_start, lambda_start,
+    mu, psi_alpha,
+    forward_eval, adjoint_eval, get_KTwk1,
+    lep, max_iters, subopt_iters
+):
     """
     Kicks off ADMM optimization. Supports both LEP and UEP optimization.
 
     Parameters
     ----------
-        forward_eval (func) :
-        adjoint_eval (func) :
-        lep          (bool) : flag to run lower endpoint optimization
+        y            (np arr) : m x 1
+        A            (np arr) : d x p
+        b            (np arr) : d x 1
+        h            (np arr) : p x 1
+        w_start      (np arr) : m x 1
+        c_start      (np arr) : d x 1
+        lambda_start (np arr) : p x 1
+        mu           (float)  : penalty parameter
+        psi_alpha    (float)  : sqrt of slack term
+        forward_eval (func)   :
+        adjoint_eval (func)   :
+        get_KTwk1    (func)   :
+        lep          (bool)   : flag to run lower endpoint optimization
+        max_iters    (int)    : number of ADMM iterations
+        subopt_iters (int)    : number of iterations in suboptimizations
 
     Returns
     -------
-        None
+        admm_output_dict (dict) : see admm_optimizer for contents
     """
     # perform checks
-    # check f(0) vector is available
+    # NONE here
 
-    print('RUN OPTIMIZER')
+    # run optimization
+    admm_output_dict = run_admm(
+        y=y,
+        A=A,
+        b=b,
+        h=h,
+        w_start=w_start,
+        c_start=c_start,
+        lambda_start=lambda_start,
+        mu=mu,
+        psi_alpha=psi_alpha,
+        forward_eval=forward_eval,
+        adjoint_eval=adjoint_eval,
+        get_KTwk1=get_KTwk1,
+        lep=lep,
+        max_iters=max_iters,
+        subopt_iters=subopt_iters
+    )
+
+    return admm_output_dict
 
 
 if __name__ == "__main__":
 
-    # LEP switch
+    # operational parameters
     LEP_OPT = True
+    MAX_ITERS = 20  # number of ADMM iterations
+    SUBOPT_ITERS = None
+    MU = 1e5
 
     # filepath file
+    OBJECTS_FP = './data/unfolding_data.pkl'
+    SAVE_PATH = './data/unfolding_results_lep.pkl'
+
+    # read in data objects for unfolding
+    with open(OBJECTS_FP, 'rb') as f:
+        unfold_objs = pickle.load(f)
+
+    y = unfold_objs['y']
+    K = unfold_objs['K']
+    A = unfold_objs['A']
+    b = unfold_objs['b']
+    psi_alpha_sq = unfold_objs['psi_alpha_sq']
+    h = unfold_objs['h']
+    osb_int_cvxpy = unfold_objs['osb_int']
+
+    print(f'CVXPY Optimized Interval: {osb_int_cvxpy}')
+
+    # define some dimensions
+    m = y.shape
+    d, p = A.shape
+
+    # create wrappers around fuctions involving K matrix
+    forward_eval = partial(forward_eval_unfold, K=K)
+    adjoint_eval = partial(adjoint_eval_unfold, K=K)
+    get_KTwk1_par = partial(get_KTwk1, K=K)
+
+    # define starting points
+    np.random.seed(12345)
+    w_sp = stats.multivariate_normal(mean=np.zeros(m)).rvs()
+    c_sp = np.zeros(d)
+    lambda_sp = np.zeros(p)
 
     # run optimization
-    run_optimizer()
+    print('Running ADMM...')
+    res_dict = run_optimizer(
+        y=y,
+        A=A,
+        b=b,
+        h=h,
+        w_start=w_sp,
+        c_start=c_sp,
+        lambda_start=lambda_sp,
+        mu=MU,
+        psi_alpha=np.sqrt(psi_alpha_sq),
+        forward_eval=forward_eval,
+        adjoint_eval=adjoint_eval,
+        get_KTwk1=get_KTwk1_par,
+        lep=LEP_OPT,
+        max_iters=MAX_ITERS,
+        subopt_iters=SUBOPT_ITERS
+    )
+
+    # show the computed result
+    print(f'Computed LEP: {res_dict["objective_evals"][-1]}')
+
+    with open(SAVE_PATH, 'wb') as f:
+        pickle.dump(res_dict, f)
+    assert os.path.isfile(SAVE_PATH)
