@@ -1,27 +1,26 @@
 """
-Script to kick off optimization jobs.
+Script to kick off optimization jobs for the unfolding problem.
 ===============================================================================
 Operation instructions:
-$ python run_endpoint_opt.py > /fp/to/stdout
+$ python run_endpoint_opt_unfolding.py > /fp/to/stdout
 ===============================================================================
 Author        : Mike Stanley
-Created       : May 24, 2023
+Created       : May 26, 2023
 Last Modified : May 26, 2023
 ===============================================================================
 """
 from admm_optimizer import run_admm
+from forward_adjoint_evaluators import forward_eval_unfold, adjoint_eval_unfold
 
 
-def get_KTwk1():
+def get_KTwk1(w, K):
     """
     Obtain the last K^Tw_{k + 1} for the next c sub-opt.
 
-    TODO - figure out if this will work by
-    1. calling the adjoint model
-    2. accessing the vector from storage somewhere
-
     Parameters
     ----------
+        w (np arr) : m x 1
+        K (np arr) : m x p - forward model
 
     Returns
     -------
@@ -30,13 +29,15 @@ def get_KTwk1():
     pass
 
 
-def run_optimizer(lep=True):
+def run_optimizer(forward_eval, adjoint_eval, lep):
     """
     Kicks off ADMM optimization. Supports both LEP and UEP optimization.
 
     Parameters
     ----------
-        lep (bool) : flag to run lower endpoint optimization
+        forward_eval (func) :
+        adjoint_eval (func) :
+        lep          (bool) : flag to run lower endpoint optimization
 
     Returns
     -------
