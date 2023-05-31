@@ -106,8 +106,8 @@ def w_update_obj_grad(
     KTw = adjoint_eval(w)
 
     # construct input for forward model run
-    f_model_input = lambda_k + lep_switch * mu_k * KTw + mu_k * h
-    f_model_input += mu_k * A.T @ c_k
+    f_model_input = lambda_k - mu_k * KTw + mu_k * h
+    f_model_input -= lep_switch * mu_k * A.T @ c_k
 
     # evaluate the forward model
     Kx = forward_eval(f_model_input)
@@ -257,6 +257,21 @@ def run_admm(
     c_k = c_start.copy()
     lambda_k = lambda_start.copy()
 
+    w_start = w_update_obj(
+        w=w_k, lambda_k=lambda_k, c_k=c_k, mu_k=mu, lep=lep,
+        psi_alpha=psi_alpha, forward_eval=forward_eval, adjoint_eval=adjoint_eval,
+        y=y, A=A, b=b, h=h
+    )
+    print(f'w-opt start: {w_start}')
+
+    print('--- starting w gradient vector --')
+    w_grad_start = w_update_obj_grad(
+        w=w_k, lambda_k=lambda_k, c_k=c_k, mu_k=mu, lep=lep,
+        psi_alpha=psi_alpha, forward_eval=forward_eval, adjoint_eval=adjoint_eval,
+        y=y, A=A, b=b, h=h
+    )
+    print(w_grad_start)
+
     for k in range(max_iters):
 
         # w - update
@@ -276,6 +291,15 @@ def run_admm(
         w_opt_status[k] = w_opt_res['success']
         w_opt_nfev[k] = w_opt_res['nfev']
         w_opt_njev[k] = w_opt_res['njev']
+
+        if k == 0:
+            # print(w_opt_res)
+            w_end = w_update_obj(
+                w=w_k, lambda_k=lambda_k, c_k=c_k, mu_k=mu, lep=lep,
+                psi_alpha=psi_alpha, forward_eval=forward_eval, adjoint_eval=adjoint_eval,
+                y=y, A=A, b=b, h=h
+            )
+            print(f'w-opt end it {k}: {w_end}')
 
         # access K^T w_{k + 1}
         KTwk1 = get_KTwk1(w_k)

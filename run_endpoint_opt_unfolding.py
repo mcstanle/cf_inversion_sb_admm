@@ -6,7 +6,7 @@ $ python run_endpoint_opt_unfolding.py > /fp/to/stdout
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 26, 2023
-Last Modified : May 26, 2023
+Last Modified : May 31, 2023
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -94,14 +94,14 @@ def run_optimizer(
 if __name__ == "__main__":
 
     # operational parameters
-    LEP_OPT = True
+    LEP_OPT = False
     MAX_ITERS = 20  # number of ADMM iterations
     SUBOPT_ITERS = 12
     MU = 1e3
 
     # filepath file
     OBJECTS_FP = './data/unfolding_data.pkl'
-    SAVE_PATH = './data/unfolding_results_lep.pkl'
+    SAVE_PATH = './data/unfolding_results_uep.pkl'
 
     # read in data objects for unfolding
     with open(OBJECTS_FP, 'rb') as f:

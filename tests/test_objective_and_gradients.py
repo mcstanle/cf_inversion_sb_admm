@@ -40,7 +40,9 @@ def load_unfolding_test_objects():
         smearing_mats = np.load(f)
         K = smearing_mats['K_rd']
 
-    with open(BASE_DIR_DECONV + '/functionals/H_80_deconvolution.npy', 'rb') as f:
+    with open(
+        BASE_DIR_DECONV + '/functionals/H_80_deconvolution.npy', 'rb'
+    ) as f:
         H = np.load(f)
 
     # set the functional of interest
