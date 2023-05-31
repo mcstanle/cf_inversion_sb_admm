@@ -211,21 +211,15 @@ def test_c_update_obj_grad(file_loc='./files/c_vec_grad.npy'):
     c_test = np.ones(p)
     LEP = True
 
-    def forward_eval(x):
-        return K @ x
-
-    def adjoint_eval(w):
-        return K.T @ w
-
     res_vec = c_update_obj_grad(
         c=c_test, KTwk1=K.T @ w_test, lambda_k=lambda_test,
         mu_k=mu, lep=LEP, A=A, b=b, h=h
     )
 
-    print('-- res vec --')
-    print(res_vec)
+    # print('-- res vec --')
+    # print(res_vec)
 
-    print('-- file vec --')
-    print(test_gradient)
+    # print('-- file vec --')
+    # print(test_gradient)
 
     assert np.allclose(test_gradient, res_vec)
