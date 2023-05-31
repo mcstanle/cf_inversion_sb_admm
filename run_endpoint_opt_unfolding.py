@@ -96,8 +96,8 @@ if __name__ == "__main__":
     # operational parameters
     LEP_OPT = True
     MAX_ITERS = 20  # number of ADMM iterations
-    SUBOPT_ITERS = None
-    MU = 1e5
+    SUBOPT_ITERS = 12
+    MU = 1e3
 
     # filepath file
     OBJECTS_FP = './data/unfolding_data.pkl'
@@ -115,6 +115,7 @@ if __name__ == "__main__":
     h = unfold_objs['h']
     osb_int_cvxpy = unfold_objs['osb_int']
 
+    print(f'Psi_alpha_sq: {psi_alpha_sq}')
     print(f'CVXPY Optimized Interval: {osb_int_cvxpy}')
 
     # define some dimensions
@@ -153,7 +154,7 @@ if __name__ == "__main__":
     )
 
     # show the computed result
-    print(f'Computed LEP: {res_dict["objective_evals"][-1]}')
+    print(f'Computed LEP values: {res_dict["objective_evals"]}')
 
     with open(SAVE_PATH, 'wb') as f:
         pickle.dump(res_dict, f)

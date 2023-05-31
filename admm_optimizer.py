@@ -106,8 +106,8 @@ def w_update_obj_grad(
     KTw = adjoint_eval(w)
 
     # construct input for forward model run
-    f_model_input = lambda_k - lep_switch * mu_k * KTw - mu_k * h
-    f_model_input -= mu_k * A.T @ c_k
+    f_model_input = lambda_k + lep_switch * mu_k * KTw + mu_k * h
+    f_model_input += mu_k * A.T @ c_k
 
     # evaluate the forward model
     Kx = forward_eval(f_model_input)
