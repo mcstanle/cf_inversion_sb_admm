@@ -21,7 +21,7 @@ TODO:
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 24, 2023
-Last Modified : May 26, 2023
+Last Modified : May 31, 2023
 ===============================================================================
 """
 import numpy as np
@@ -262,7 +262,7 @@ def run_admm(
         # w - update
         w_opt_res = minimize(
             fun=w_update_obj,
-            x0=w_start,
+            x0=w_k,
             jac=w_update_obj_grad,
             args=(
                 lambda_k, c_k, mu, lep, psi_alpha,
