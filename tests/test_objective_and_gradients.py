@@ -180,7 +180,7 @@ def test_w_update_obj_grad(file_loc='./files/w_vec_grad.npy'):
         return K.T @ w
 
     res_vec = w_update_obj_grad(
-        w=w_test, lambda_k=lambda_test, c_k=c_test, mu_k=mu, 
+        w=w_test, lambda_k=lambda_test, c_k=c_test, mu_k=mu,
         lep=LEP, psi_alpha=psi_alpha,
         forward_eval=forward_eval, adjoint_eval=adjoint_eval,
         y=y, A=A, b=b, h=h

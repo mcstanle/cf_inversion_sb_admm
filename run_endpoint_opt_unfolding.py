@@ -15,6 +15,11 @@ from forward_adjoint_evaluators import forward_eval_unfold, adjoint_eval_unfold
 import numpy as np
 import os
 import pickle
+from plotting import (
+    plot_objective,
+    plot_feasibility,
+    plot_optimality
+)
 from scipy import stats
 
 
@@ -98,10 +103,13 @@ if __name__ == "__main__":
     MAX_ITERS = 20  # number of ADMM iterations
     SUBOPT_ITERS = 12
     MU = 1e3
+    MU_S = '1e3'
 
     # filepath file
+    pfx = 'LEP' if LEP_OPT else 'UEP'
     OBJECTS_FP = './data/unfolding_data.pkl'
-    SAVE_PATH = './data/unfolding_results_uep.pkl'
+    SAVE_PATH = f'./data/unfolding_results_{pfx}_mu{MU_S}.pkl'
+    PLOT_PATH = f'./data/{pfx}_diagnostic_plots'
 
     # read in data objects for unfolding
     with open(OBJECTS_FP, 'rb') as f:
@@ -154,7 +162,30 @@ if __name__ == "__main__":
     )
 
     # show the computed result
-    print(f'Computed LEP values: {res_dict["objective_evals"]}')
+    print(f'Computed {pfx} values: {res_dict["objective_evals"]}')
+
+    # generate plots
+    plot_objective(
+        results_dict=res_dict,
+        save_path=PLOT_PATH + f'/{pfx}_mu{MU_S}_20maxiter_12suboptiter.png',
+        true_endpoint=osb_int_cvxpy[0 if LEP_OPT else 1],
+        obj_plot_label='Objective function values',
+        # ylim=(0, 5e3)
+    )
+    feas_fp = PLOT_PATH + f'/{pfx}_mu{MU_S}_20maxiter_12suboptiter_feas.png'
+    plot_feasibility(
+        results_dict=res_dict,
+        save_path=feas_fp,
+        lep=LEP_OPT, h=h, A=A,
+        # cutoff=1e-1
+    )
+    opt_fp = PLOT_PATH + f'/{pfx}_mu{MU_S}_20maxiter_12suboptiter_opt.png'
+    plot_optimality(
+        results_dict=res_dict,
+        save_path=opt_fp,
+        lep=LEP_OPT,
+        y=y, K=K, psi_alpha=np.sqrt(psi_alpha_sq)
+    )
 
     with open(SAVE_PATH, 'wb') as f:
         pickle.dump(res_dict, f)

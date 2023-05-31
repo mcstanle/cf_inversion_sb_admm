@@ -251,26 +251,12 @@ def run_admm(
     w_opt_vecs = np.zeros(shape=(max_iters, m))
     c_opt_vecs = np.zeros(shape=(max_iters, d))
     lambda_opt_vecs = np.zeros(shape=(max_iters, p))
+    KTw_vecs = np.zeros(shape=(max_iters, p))
 
     # initialize optimization vectors
     w_k = w_start.copy()
     c_k = c_start.copy()
     lambda_k = lambda_start.copy()
-
-    w_start = w_update_obj(
-        w=w_k, lambda_k=lambda_k, c_k=c_k, mu_k=mu, lep=lep,
-        psi_alpha=psi_alpha, forward_eval=forward_eval, adjoint_eval=adjoint_eval,
-        y=y, A=A, b=b, h=h
-    )
-    print(f'w-opt start: {w_start}')
-
-    print('--- starting w gradient vector --')
-    w_grad_start = w_update_obj_grad(
-        w=w_k, lambda_k=lambda_k, c_k=c_k, mu_k=mu, lep=lep,
-        psi_alpha=psi_alpha, forward_eval=forward_eval, adjoint_eval=adjoint_eval,
-        y=y, A=A, b=b, h=h
-    )
-    print(w_grad_start)
 
     for k in range(max_iters):
 
@@ -292,17 +278,9 @@ def run_admm(
         w_opt_nfev[k] = w_opt_res['nfev']
         w_opt_njev[k] = w_opt_res['njev']
 
-        if k == 0:
-            # print(w_opt_res)
-            w_end = w_update_obj(
-                w=w_k, lambda_k=lambda_k, c_k=c_k, mu_k=mu, lep=lep,
-                psi_alpha=psi_alpha, forward_eval=forward_eval, adjoint_eval=adjoint_eval,
-                y=y, A=A, b=b, h=h
-            )
-            print(f'w-opt end it {k}: {w_end}')
-
         # access K^T w_{k + 1}
         KTwk1 = get_KTwk1(w_k)
+        KTw_vecs[k, :] = KTwk1
 
         # c - update
         c_opt_res = minimize(
@@ -354,5 +332,6 @@ def run_admm(
         },
         'lambda_opt_output': {
             'vectors': lambda_opt_vecs
-        }
+        },
+        'KTw_vecs': KTw_vecs
     }

@@ -20,7 +20,16 @@ from scipy import stats
 from test_objective_and_gradients import load_unfolding_test_objects
 
 
+test_numbers = {
+    'lep': 2101.034800054623,
+    'uep': 4682.662766066206
+}
+
+
 def test_run_admm_lep():
+    """
+    The verification number in here is correct as of May 31, 2023.
+    """
 
     # obtain objects to run tess
     K_tilde, y_tilde, psi_sq, h = load_unfolding_test_objects()
@@ -59,10 +68,13 @@ def test_run_admm_lep():
         max_iters=MAX_ITERS, subopt_iters=SUBOPT_ITERS
     )
 
-    assert output_dict['objective_evals'][-1] == 2101.034800054623
+    assert output_dict['objective_evals'][-1] == test_numbers['lep']
 
 
 def test_run_admm_uep():
+    """
+    The verification number in here is correct as of May 31, 2023.
+    """
 
     # obtain objects to run tess
     K_tilde, y_tilde, psi_sq, h = load_unfolding_test_objects()
@@ -101,4 +113,4 @@ def test_run_admm_uep():
         max_iters=MAX_ITERS, subopt_iters=SUBOPT_ITERS
     )
 
-    assert output_dict['objective_evals'][-1] == 4682.662766066206
+    assert output_dict['objective_evals'][-1] == test_numbers['uep']
