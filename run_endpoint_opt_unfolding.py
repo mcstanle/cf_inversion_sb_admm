@@ -130,6 +130,9 @@ if __name__ == "__main__":
     m = y.shape
     d, p = A.shape
 
+    # directory for adjoint eval hash table
+    ADJOINT_EVAL_HT_FP = './data/adjoint_hash_tables'
+
     # create wrappers around fuctions involving K matrix
     forward_eval = partial(forward_eval_unfold, K=K)
     adjoint_eval = partial(adjoint_eval_unfold, K=K)
