@@ -9,7 +9,6 @@ Stay tuned!
 Create the following directory structure:
 ```bash
 ├── data
-│   ├── adjoint_hash_tables
 │   ├── lep_diagnostic_plots
 │   │   ├── LEP_mu1e3_20maxiter_12suboptiter.png
 │   │   ├── LEP_mu1e3_20maxiter_12suboptiter_feas.png

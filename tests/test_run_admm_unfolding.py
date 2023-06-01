@@ -6,7 +6,7 @@ unfolding_with_admm_rank_deficient.ipynb.
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 31, 2023
-Last Modified : May 31, 2023
+Last Modified : Jun 01, 2023
 ===============================================================================
 """
 import sys
@@ -15,6 +15,8 @@ from admm_optimizer import run_admm
 from forward_adjoint_evaluators import forward_eval_unfold, adjoint_eval_unfold
 from functools import partial
 import numpy as np
+import os
+import pickle
 from run_endpoint_opt_unfolding import get_KTwk1
 from scipy import stats
 from test_objective_and_gradients import load_unfolding_test_objects
@@ -41,10 +43,15 @@ def test_run_admm_lep():
     A = - np.identity(p)
     b = np.zeros(p)
 
+    # directory for adjoint eval hash table
+    ADJOINT_EVAL_HT_FP = './data/adjoint_lookup_TEMP.pkl'
+
     # create wrappers around fuctions involving K matrix
     forward_eval = partial(forward_eval_unfold, K=K_tilde)
     adjoint_eval = partial(adjoint_eval_unfold, K=K_tilde)
-    get_KTwk1_par = partial(get_KTwk1, K=K_tilde)
+    get_KTwk1_par = partial(
+        get_KTwk1, adjoint_ht_fp=ADJOINT_EVAL_HT_FP
+    )
 
     # define starting points
     np.random.seed(12345)
@@ -58,6 +65,10 @@ def test_run_admm_lep():
     SUBOPT_ITERS = 12
     MU = 1e3
 
+    # create a hash table for the adjoint evaluations
+    with open(ADJOINT_EVAL_HT_FP, 'wb') as f:
+        pickle.dump({0: None}, f)
+
     # run optimization
     output_dict = run_admm(
         y=y_tilde, A=A, b=b, h=h,
@@ -65,8 +76,10 @@ def test_run_admm_lep():
         mu=MU, psi_alpha=np.sqrt(psi_sq),
         forward_eval=forward_eval, adjoint_eval=adjoint_eval,
         get_KTwk1=get_KTwk1_par, lep=LEP_OPT,
-        max_iters=MAX_ITERS, subopt_iters=SUBOPT_ITERS
+        max_iters=MAX_ITERS, subopt_iters=SUBOPT_ITERS,
+        adjoint_ht_fp=ADJOINT_EVAL_HT_FP
     )
+    os.remove(ADJOINT_EVAL_HT_FP)
 
     assert output_dict['objective_evals'][-1] == test_numbers['lep']
 
@@ -86,10 +99,15 @@ def test_run_admm_uep():
     A = - np.identity(p)
     b = np.zeros(p)
 
+    # directory for adjoint eval hash table
+    ADJOINT_EVAL_HT_FP = './data/adjoint_lookup_TEMP.pkl'
+
     # create wrappers around fuctions involving K matrix
     forward_eval = partial(forward_eval_unfold, K=K_tilde)
     adjoint_eval = partial(adjoint_eval_unfold, K=K_tilde)
-    get_KTwk1_par = partial(get_KTwk1, K=K_tilde)
+    get_KTwk1_par = partial(
+        get_KTwk1, adjoint_ht_fp=ADJOINT_EVAL_HT_FP
+    )
 
     # define starting points
     np.random.seed(12345)
@@ -110,7 +128,8 @@ def test_run_admm_uep():
         mu=MU, psi_alpha=np.sqrt(psi_sq),
         forward_eval=forward_eval, adjoint_eval=adjoint_eval,
         get_KTwk1=get_KTwk1_par, lep=LEP_OPT,
-        max_iters=MAX_ITERS, subopt_iters=SUBOPT_ITERS
+        max_iters=MAX_ITERS, subopt_iters=SUBOPT_ITERS,
+        adjoint_ht_fp=ADJOINT_EVAL_HT_FP
     )
 
     assert output_dict['objective_evals'][-1] == test_numbers['uep']

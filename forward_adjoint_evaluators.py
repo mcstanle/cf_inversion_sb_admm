@@ -14,6 +14,7 @@ Created       : May 26, 2023
 Last Modified : Jun 01, 2023
 ===============================================================================
 """
+import pickle
 
 
 def forward_eval_unfold(x, K):
@@ -48,10 +49,20 @@ def adjoint_eval_unfold(w, K, h_tabl_fp):
     -------
         K^Tw (np arr) : p x 1
     """
-    # evaluate the adjoing
+    # evaluate the adjoint
     KTw = K.T @ w
 
     # read in file
+    with open(h_tabl_fp, 'rb') as f:
+        adjoint_ht = pickle.load(f)
+
+    # add new key value pair
+    key = hash(w.tobytes())
+    adjoint_ht[key] = KTw
+
+    # write out new updated hash table
+    with open(h_tabl_fp, 'wb') as f:
+        pickle.dump(adjoint_ht, f)
 
     return KTw
 

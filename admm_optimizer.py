@@ -25,6 +25,8 @@ Last Modified : Jun 01, 2023
 ===============================================================================
 """
 import numpy as np
+import os
+import pickle
 from scipy.optimize import minimize
 
 
@@ -197,7 +199,8 @@ def endpoint_objective(w, c, b, y, lep, psi_alpha):
 def run_admm(
     y, A, b, h, w_start, c_start, lambda_start, mu, psi_alpha,
     forward_eval, adjoint_eval, get_KTwk1,
-    lep, max_iters, subopt_iters
+    lep, max_iters, subopt_iters,
+    adjoint_ht_fp
 ):
     """
     ADMM interval endpoint optimizer.
@@ -210,21 +213,22 @@ def run_admm(
 
     Parameters
     ----------
-        y            (np arr) : m x 1 -- observation
-        A            (np arr) : d x p -- constraint matrix
-        b            (np arr) : d x 1 -- constraint vector
-        h            (np arr) : p x 1 -- functional of interest
-        w_start      (np arr) : m x 1 -- starting position for w
-        c_start      (np arr) : d x 1 -- starting position for c
-        lambda_start (np arr) : d x 1 -- starting position for lambda
-        psi_alpha    (float)  : optimized slack factor
-        forward_eval (func)   : returns Kx (e.g., GEOS-Chem at x)
-        adjoint_eval (func)   : returns K^T w
-        get_KTwk1    (func)   : returns the previous K^Tw_{k+1} for c opt
-        mu           (float)  : penalty parameter
-        lep          (bool)   : True if solving for the lower endpoint
-        max_iters    (int)    : maximum number of outer loop ADMM iterations
-        subopt_iters (int)    : maximum number of iterations for w optimization
+        y             (np arr) : m x 1 -- observation
+        A             (np arr) : d x p -- constraint matrix
+        b             (np arr) : d x 1 -- constraint vector
+        h             (np arr) : p x 1 -- functional of interest
+        w_start       (np arr) : m x 1 -- starting position for w
+        c_start       (np arr) : d x 1 -- starting position for c
+        lambda_start  (np arr) : d x 1 -- starting position for lambda
+        psi_alpha     (float)  : optimized slack factor
+        forward_eval  (func)   : returns Kx (e.g., GEOS-Chem at x)
+        adjoint_eval  (func)   : returns K^T w
+        get_KTwk1     (func)   : returns the previous K^Tw_{k+1} for c opt
+        mu            (float)  : penalty parameter
+        lep           (bool)   : True if solving for the lower endpoint
+        max_iters     (int)    : max number of outer loop ADMM iterations
+        subopt_iters  (int)    : max number of iterations for w optimization
+        adjoint_ht_fp (str)    : filepath to hashtable for storing adjoint vals
 
     Returns
     -------
@@ -260,6 +264,10 @@ def run_admm(
 
     for k in range(max_iters):
 
+        # create a hash table for the adjoint evaluations
+        with open(adjoint_ht_fp, 'wb') as f:
+            pickle.dump({0: None}, f)
+
         # w - update
         w_opt_res = minimize(
             fun=w_update_obj,
@@ -281,6 +289,9 @@ def run_admm(
         # access K^T w_{k + 1}
         KTwk1 = get_KTwk1(w_k)
         KTw_vecs[k, :] = KTwk1
+
+        # delete the hash table
+        os.remove(adjoint_ht_fp)
 
         # c - update
         c_opt_res = minimize(
