@@ -4,9 +4,11 @@ lower and upper endpoints. The comparison results are those obtained in the
 notebook ~/Research/Carbon_Flux/optimization/ADMM_dual_ascent/
 unfolding_with_admm_rank_deficient.ipynb.
 ===============================================================================
+NOTE - used the pytest.fixture decorator to take care  of hashtable file io
+===============================================================================
 Author        : Mike Stanley
 Created       : May 31, 2023
-Last Modified : Jun 01, 2023
+Last Modified : Jun 07, 2023
 ===============================================================================
 """
 import sys
@@ -17,6 +19,7 @@ from functools import partial
 import numpy as np
 import os
 import pickle
+import pytest
 from run_endpoint_opt_unfolding import get_KTwk1
 from scipy import stats
 from test_objective_and_gradients import load_unfolding_test_objects
@@ -28,7 +31,15 @@ test_numbers = {
 }
 
 
-def test_run_admm_lep():
+@pytest.fixture
+def temp_file(tmp_path):
+    """ creates a temporary file to use for hash tables in below tests """
+    file_path = tmp_path / "adjoint_lookup_TEMP.pkl"
+    file_path.touch()
+    return file_path
+
+
+def test_run_admm_lep(temp_file):
     """
     The verification number in here is correct as of May 31, 2023.
     """
@@ -44,11 +55,15 @@ def test_run_admm_lep():
     b = np.zeros(p)
 
     # directory for adjoint eval hash table
-    ADJOINT_EVAL_HT_FP = './data/adjoint_lookup_TEMP.pkl'
+    ADJOINT_EVAL_HT_FP = temp_file
 
     # create wrappers around fuctions involving K matrix
     forward_eval = partial(forward_eval_unfold, K=K_tilde)
-    adjoint_eval = partial(adjoint_eval_unfold, K=K_tilde)
+    adjoint_eval = partial(
+        adjoint_eval_unfold,
+        K=K_tilde,
+        h_tabl_fp=ADJOINT_EVAL_HT_FP
+    )
     get_KTwk1_par = partial(
         get_KTwk1, adjoint_ht_fp=ADJOINT_EVAL_HT_FP
     )
@@ -65,10 +80,6 @@ def test_run_admm_lep():
     SUBOPT_ITERS = 12
     MU = 1e3
 
-    # create a hash table for the adjoint evaluations
-    with open(ADJOINT_EVAL_HT_FP, 'wb') as f:
-        pickle.dump({0: None}, f)
-
     # run optimization
     output_dict = run_admm(
         y=y_tilde, A=A, b=b, h=h,
@@ -79,12 +90,11 @@ def test_run_admm_lep():
         max_iters=MAX_ITERS, subopt_iters=SUBOPT_ITERS,
         adjoint_ht_fp=ADJOINT_EVAL_HT_FP
     )
-    os.remove(ADJOINT_EVAL_HT_FP)
 
     assert output_dict['objective_evals'][-1] == test_numbers['lep']
 
 
-def test_run_admm_uep():
+def test_run_admm_uep(temp_file):
     """
     The verification number in here is correct as of May 31, 2023.
     """
@@ -100,11 +110,14 @@ def test_run_admm_uep():
     b = np.zeros(p)
 
     # directory for adjoint eval hash table
-    ADJOINT_EVAL_HT_FP = './data/adjoint_lookup_TEMP.pkl'
+    ADJOINT_EVAL_HT_FP = temp_file
 
     # create wrappers around fuctions involving K matrix
     forward_eval = partial(forward_eval_unfold, K=K_tilde)
-    adjoint_eval = partial(adjoint_eval_unfold, K=K_tilde)
+    adjoint_eval = partial(
+        adjoint_eval_unfold,
+        K=K_tilde, h_tabl_fp=ADJOINT_EVAL_HT_FP
+    )
     get_KTwk1_par = partial(
         get_KTwk1, adjoint_ht_fp=ADJOINT_EVAL_HT_FP
     )

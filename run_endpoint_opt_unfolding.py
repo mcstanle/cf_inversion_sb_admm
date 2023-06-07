@@ -6,7 +6,7 @@ $ python run_endpoint_opt_unfolding.py > /fp/to/stdout
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 26, 2023
-Last Modified : Jun 01, 2023
+Last Modified : Jun 07, 2023
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -108,7 +108,6 @@ def check_directories():
     Checks for necessary directories to run code.
     """
     assert os.path.isdir('./data')
-    assert os.path.isdir('./data/adjoint_hash_tables')
     assert os.path.isdir('./data/lep_diagnostic_plots')
     assert os.path.isdir('./data/uep_diagnostic_plots')
 
@@ -116,7 +115,7 @@ def check_directories():
 if __name__ == "__main__":
 
     # operational parameters
-    LEP_OPT = False
+    LEP_OPT = True
     MAX_ITERS = 20  # number of ADMM iterations
     SUBOPT_ITERS = 12
     MU = 1e3
