@@ -5,8 +5,9 @@ unfolding problem.
 Generates data from the correct poisson process.
 ===============================================================================
 Creates a dictionary with the following elements
-1. y            (observation vector -- transformed by cholesky decomp)
-2. K            (smearning matrix -- transformed by cholesky decomp)
+1. y            (observation vector)
+2. K            (smearing matrix)
+3. L_inv        (inverse of lower tri Cholesky factor of covar matrix)
 3. A            (constraint matrix)
 4. b            (constraint vector)
 5. psi_alpha_sq (slack factor)
@@ -18,7 +19,7 @@ NOTE: See /Research/Carbon_Flux/optimization/ADMM_dual_ascent/
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 26, 2023
-Last Modified : May 26, 2023
+Last Modified : Jun 07, 2023
 ===============================================================================
 """
 import cvxpy as cp
@@ -187,15 +188,15 @@ if __name__ == '__main__':
     L_data_inv = np.linalg.inv(L_data)
 
     # transform the matrix
-    K_tilde = L_data_inv @ K
+    # K_tilde = L_data_inv @ K
 
     # transform the data
-    y_tilde = L_data_inv @ y
+    # y_tilde = L_data_inv @ y
 
     # find the interval
     osb_lep, osb_uep, psi_alpha_sq = osb_interval(
-        y=y_tilde,
-        K=K_tilde,
+        y=L_data_inv @ y,
+        K=L_data_inv @ K,
         h=h,
         A=A,
         alpha=ALPHA
@@ -205,8 +206,9 @@ if __name__ == '__main__':
     # write data to an npz file
     with open(BASE_PATH + '/unfolding_data.pkl', 'wb') as f:
         pickle.dump({
-            'y': y_tilde,
-            'K': K_tilde,
+            'y': y,
+            'K': K,
+            'L_inv': L_data_inv,
             'A': A,
             'b': b,
             'psi_alpha_sq': psi_alpha_sq,

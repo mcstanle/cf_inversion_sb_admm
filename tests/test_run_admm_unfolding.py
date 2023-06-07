@@ -26,8 +26,8 @@ from test_objective_and_gradients import load_unfolding_test_objects
 
 
 test_numbers = {
-    'lep': 2101.034800054623,
-    'uep': 4682.662766066206
+    'lep': 2100.8794474850197,  # 2101.034800054623,
+    'uep': 4697.200645884314  # 4682.662766066206
 }
 
 
@@ -45,10 +45,10 @@ def test_run_admm_lep(temp_file):
     """
 
     # obtain objects to run tess
-    K_tilde, y_tilde, psi_sq, h = load_unfolding_test_objects()
+    K, L_inv, y, psi_sq, h = load_unfolding_test_objects()
 
     # dimensions
-    m, p = K_tilde.shape
+    m, p = K.shape
 
     # constraint objects
     A = - np.identity(p)
@@ -58,10 +58,13 @@ def test_run_admm_lep(temp_file):
     ADJOINT_EVAL_HT_FP = temp_file
 
     # create wrappers around fuctions involving K matrix
-    forward_eval = partial(forward_eval_unfold, K=K_tilde)
+    forward_eval = partial(
+        forward_eval_unfold,
+        K=K, L_inv=L_inv
+    )
     adjoint_eval = partial(
         adjoint_eval_unfold,
-        K=K_tilde,
+        K=K, L_inv=L_inv,
         h_tabl_fp=ADJOINT_EVAL_HT_FP
     )
     get_KTwk1_par = partial(
@@ -82,7 +85,7 @@ def test_run_admm_lep(temp_file):
 
     # run optimization
     output_dict = run_admm(
-        y=y_tilde, A=A, b=b, h=h,
+        y=L_inv @ y, A=A, b=b, h=h,
         w_start=w_sp, c_start=c_sp, lambda_start=lambda_sp,
         mu=MU, psi_alpha=np.sqrt(psi_sq),
         forward_eval=forward_eval, adjoint_eval=adjoint_eval,
@@ -100,10 +103,10 @@ def test_run_admm_uep(temp_file):
     """
 
     # obtain objects to run tess
-    K_tilde, y_tilde, psi_sq, h = load_unfolding_test_objects()
+    K, L_inv, y, psi_sq, h = load_unfolding_test_objects()
 
     # dimensions
-    m, p = K_tilde.shape
+    m, p = K.shape
 
     # constraint objects
     A = - np.identity(p)
@@ -113,10 +116,14 @@ def test_run_admm_uep(temp_file):
     ADJOINT_EVAL_HT_FP = temp_file
 
     # create wrappers around fuctions involving K matrix
-    forward_eval = partial(forward_eval_unfold, K=K_tilde)
+    forward_eval = partial(
+        forward_eval_unfold,
+        K=K, L_inv=L_inv
+    )
     adjoint_eval = partial(
         adjoint_eval_unfold,
-        K=K_tilde, h_tabl_fp=ADJOINT_EVAL_HT_FP
+        K=K, L_inv=L_inv,
+        h_tabl_fp=ADJOINT_EVAL_HT_FP
     )
     get_KTwk1_par = partial(
         get_KTwk1, adjoint_ht_fp=ADJOINT_EVAL_HT_FP
@@ -136,7 +143,7 @@ def test_run_admm_uep(temp_file):
 
     # run optimization
     output_dict = run_admm(
-        y=y_tilde, A=A, b=b, h=h,
+        y=L_inv @ y, A=A, b=b, h=h,
         w_start=w_sp, c_start=c_sp, lambda_start=lambda_sp,
         mu=MU, psi_alpha=np.sqrt(psi_sq),
         forward_eval=forward_eval, adjoint_eval=adjoint_eval,

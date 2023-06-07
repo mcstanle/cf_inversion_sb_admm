@@ -11,29 +11,30 @@ Currently supported applications:
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 26, 2023
-Last Modified : Jun 01, 2023
+Last Modified : Jun 07, 2023
 ===============================================================================
 """
 import pickle
 
 
-def forward_eval_unfold(x, K):
+def forward_eval_unfold(x, K, L_inv):
     """
     Performs a forward evaluation for the unfolding problem.
 
     Parameters
     ----------
-        x (np arr) : p x 1 - input vector
-        K (np arr) : m x p - forward model matrix
+        x     (np arr) : p x 1 - input vector
+        K     (np arr) : m x p - forward model matrix
+        L_inv (np arr) : m x m - inverse of l-tri cholesky factor
 
     Returns
     -------
         Kx (np arr) : m x 1
     """
-    return K @ x
+    return L_inv @ K @ x
 
 
-def adjoint_eval_unfold(w, K, h_tabl_fp):
+def adjoint_eval_unfold(w, K, L_inv, h_tabl_fp):
     """
     Performs an adjoint evaluation for the unfolding problem.
 
@@ -43,6 +44,7 @@ def adjoint_eval_unfold(w, K, h_tabl_fp):
     ----------
         w         (np arr) : m x 1 - input vector
         K         (np arr) : m x p - forward model matrix
+        L_inv     (np arr) : m x m - inverse of l-tri cholesky factor
         h_tabl_fp (str)    : filepath to pickled dictionary hash table
 
     Returns
@@ -50,7 +52,7 @@ def adjoint_eval_unfold(w, K, h_tabl_fp):
         K^Tw (np arr) : p x 1
     """
     # evaluate the adjoint
-    KTw = K.T @ w
+    KTw = K.T @ L_inv @ w
 
     # read in file
     with open(h_tabl_fp, 'rb') as f:

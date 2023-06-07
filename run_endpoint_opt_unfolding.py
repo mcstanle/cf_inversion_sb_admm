@@ -136,6 +136,7 @@ if __name__ == "__main__":
 
     y = unfold_objs['y']
     K = unfold_objs['K']
+    L_inv = unfold_objs['L_inv']
     A = unfold_objs['A']
     b = unfold_objs['b']
     psi_alpha_sq = unfold_objs['psi_alpha_sq']
@@ -153,9 +154,14 @@ if __name__ == "__main__":
     ADJOINT_EVAL_HT_FP = './data/adjoint_lookup_TEMP.pkl'
 
     # create wrappers around fuctions involving K matrix
-    forward_eval = partial(forward_eval_unfold, K=K)
+    forward_eval = partial(
+        forward_eval_unfold,
+        K=K, L_inv=L_inv
+    )
     adjoint_eval = partial(
-        adjoint_eval_unfold, K=K, h_tabl_fp=ADJOINT_EVAL_HT_FP
+        adjoint_eval_unfold,
+        K=K, L_inv=L_inv,
+        h_tabl_fp=ADJOINT_EVAL_HT_FP
     )
     get_KTwk1_par = partial(
         get_KTwk1, adjoint_ht_fp=ADJOINT_EVAL_HT_FP
@@ -167,10 +173,13 @@ if __name__ == "__main__":
     c_sp = np.zeros(d)
     lambda_sp = np.zeros(p)
 
+    # transform data by inverse cholsky factor
+    y_tilde = L_inv @ y
+
     # run optimization
     print('Running ADMM...')
     res_dict = run_optimizer(
-        y=y,
+        y=y_tilde,
         A=A,
         b=b,
         h=h,

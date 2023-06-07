@@ -61,9 +61,9 @@ def load_unfolding_test_objects():
     # change of basis
     Sigma_data = np.diag(smeared_means)
     L_data = np.linalg.cholesky(Sigma_data)
-    L_data_inv = np.linalg.inv(L_data)
-    K_tilde = L_data_inv @ K
-    y_tilde = L_data_inv @ y
+    L_inv = np.linalg.inv(L_data)
+    K_tilde = L_inv @ K
+    y_tilde = L_inv @ y
 
     # slack factor
     x = cp.Variable(p)
@@ -82,7 +82,7 @@ def load_unfolding_test_objects():
         stats.norm(loc=0, scale=1).ppf(1 - (0.05 / 2))
     ) + s2
 
-    return K_tilde, y_tilde, psi_sq, h
+    return K, L_inv, y, psi_sq, h
 
 
 def test_w_update_obj():
@@ -90,7 +90,7 @@ def test_w_update_obj():
     Test w_update_obj.
     """
     # create necessary objects
-    K, y, psi_sq, h = load_unfolding_test_objects()
+    K, L_inv, y, psi_sq, h = load_unfolding_test_objects()
 
     # dimensions
     m, p = K.shape
@@ -108,15 +108,15 @@ def test_w_update_obj():
     psi_alpha = np.sqrt(psi_sq)
 
     def forward_eval(x):
-        return K @ x
+        return L_inv @ K @ x
 
     def adjoint_eval(w):
-        return K.T @ w
+        return K.T @ L_inv @ w
 
     res = w_update_obj(
         w=w_test, lambda_k=lambda_test, c_k=c_test, mu_k=mu,
         lep=LEP, psi_alpha=psi_alpha, forward_eval=forward_eval,
-        adjoint_eval=adjoint_eval, y=y, A=A, b=b, h=h
+        adjoint_eval=adjoint_eval, y=L_inv @ y, A=A, b=b, h=h
     )
 
     assert res == 118140.96370323896
@@ -125,7 +125,7 @@ def test_w_update_obj():
 def test_c_update_obj():
 
     # create necessary objects
-    K, y, psi_sq, h = load_unfolding_test_objects()
+    K, L_inv, y, psi_sq, h = load_unfolding_test_objects()
 
     # dimensions
     m, p = K.shape
@@ -141,7 +141,7 @@ def test_c_update_obj():
     LEP = True
 
     res = c_update_obj(
-        c=c_test, KTwk1=K.T @ w_test, lambda_k=lambda_test,
+        c=c_test, KTwk1=K.T @ L_inv @ w_test, lambda_k=lambda_test,
         mu_k=mu, lep=LEP, A=A, b=b, h=h
     )
 
@@ -156,7 +156,7 @@ def test_w_update_obj_grad(file_loc='./files/w_vec_grad.npy'):
         test_gradient = np.load(f)
 
     # create necessary objects
-    K, y, psi_sq, h = load_unfolding_test_objects()
+    K, L_inv, y, psi_sq, h = load_unfolding_test_objects()
 
     # dimensions
     m, p = K.shape
@@ -174,16 +174,16 @@ def test_w_update_obj_grad(file_loc='./files/w_vec_grad.npy'):
     psi_alpha = np.sqrt(psi_sq)
 
     def forward_eval(x):
-        return K @ x
+        return L_inv @ K @ x
 
     def adjoint_eval(w):
-        return K.T @ w
+        return K.T @ L_inv @ w
 
     res_vec = w_update_obj_grad(
         w=w_test, lambda_k=lambda_test, c_k=c_test, mu_k=mu,
         lep=LEP, psi_alpha=psi_alpha,
         forward_eval=forward_eval, adjoint_eval=adjoint_eval,
-        y=y, A=A, b=b, h=h
+        y=L_inv @ y, A=A, b=b, h=h
     )
 
     assert np.allclose(test_gradient, res_vec)
@@ -197,7 +197,7 @@ def test_c_update_obj_grad(file_loc='./files/c_vec_grad.npy'):
         test_gradient = np.load(f)
 
     # create necessary objects
-    K, y, psi_sq, h = load_unfolding_test_objects()
+    K, L_inv, y, psi_sq, h = load_unfolding_test_objects()
 
     # dimensions
     m, p = K.shape
@@ -214,7 +214,7 @@ def test_c_update_obj_grad(file_loc='./files/c_vec_grad.npy'):
     LEP = True
 
     res_vec = c_update_obj_grad(
-        c=c_test, KTwk1=K.T @ w_test, lambda_k=lambda_test,
+        c=c_test, KTwk1=K.T @ L_inv @ w_test, lambda_k=lambda_test,
         mu_k=mu, lep=LEP, A=A, b=b, h=h
     )
 
