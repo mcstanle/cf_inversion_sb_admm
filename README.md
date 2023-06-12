@@ -3,9 +3,20 @@ using an ADMM algorithm, using `scipy` as the sub-optimization backend and wrapp
 GEOS-Chem and GEOS-Chem Adjoint for forward and adjoint evaluations.
 
 # Operational Instructions
-Stay tuned!
+## 1 - Create affine correction
+Because the ADMM algorithm assumes a linear forward model and GEOS-Chem for CO2 transport is affine in the scaling factors, we must compute a correction accounting for the contribution to XCO2 as a result of non-biospheric sources of CO2.
+
+To generate this correction vector, run
+```bash
+python create_affine_correction.py
+```
+The above saves the output file to `/glade/work/mcstanley/admm_objects/fixed_optimization_inputs/affine_correction.npy`.
 
 # Required directory structure
+## Carbon Flux
+>>
+
+## Unfolding Experiment
 Create the following directory structure:
 ```bash
 ├── data
