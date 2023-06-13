@@ -12,6 +12,9 @@ python create_affine_correction.py
 ```
 The above saves the output file to `/glade/work/mcstanley/admm_objects/fixed_optimization_inputs/affine_correction.npy`.
 
+## Run endpoint optimizations
+LEP is run using the bash script `run_lep.sh` and predictably, the UEP optimization is run using `run_uep.sh`. Both of these run the script `run_endpoint_opt_carbon_flux.py` by changing key environmental variables.
+
 # Required directory structure
 ## Carbon Flux
 >>
@@ -42,3 +45,10 @@ Create the following directory structure:
 │   └── unfolding_results_UEP.pkl
 ```
 `data` holds the actual optimzer results. `lep_diagnostic_plots` and `uep_diagnostic_plots` are save locations for the outputted feasibility and optimality (in available) plots. `adjoint_hash_tables` stores the hash tables allowing for the adjoint mapping lookups.
+
+# Certification of Components
+1. Affine Correction Generation
+    1. Performed on 6/13/2023. File saved to `glade/work/mcstanley/admm_objects/fixed_optimization_inputs/affine_correction.npy` by running `python create_affine_correction.py` in Cheyenne.
+    2. Involves correct functionality of `forward_adjoint_evaluators.forward_eval_cf`.
+2. Linear Component of Forward model
+    1. `forward_adjoint_evaluators.forward_linear_eval_cf`

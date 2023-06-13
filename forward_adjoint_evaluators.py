@@ -14,10 +14,11 @@ Created       : May 26, 2023
 Last Modified : Jun 13, 2023
 ===============================================================================
 """
-from io_opt import write_sfs_to_file
+from io_opt import read_cfn_file, write_sfs_to_file
 import numpy as np
 from os.path import exists
 import pickle
+import PseudoNetCDF as pnc
 import subprocess
 import time
 
@@ -154,10 +155,111 @@ def forward_eval_cf(
     return f_c
 
 
-def adjoint_eval_cf():
+def forward_linear_eval_cf(
+        c, aff_corr_fp, gc_dir, sf_fp, fm_run_fp, time_wait,
+        max_et=28800  # default 8 hr
+):
+    """
+    Returns only the linear component of the affine forward model, i.e.,
+        Kc = f(c) - b.
+
+    NOTE: expects b to be contained in npy file.
+
+    Parameters
+    ----------
+        c           (np arr) : input scaling factor vector
+        aff_corr_fp (str)    :
+        gc_dir      (str)    : directory where GEOS-Chem is run and where
+                               gctm.sf.01 is found
+        sf_fp       (str)    : file path to where scaling factor is saved
+        fm_run_fp   (str)    : forward model run script file path
+        time_wait   (float)  : time to wait between each check for the
+                               existence of gctm.sf.01
+        max_et      (int)    : maximum time (seconds) the code will wait
+
+    Returns
+    -------
+        f_c - b (np arr) : forward model minus affine term
+    """
+    # call the forward model
+    f_c = forward_eval_cf(
+        c=c,
+        gc_dir=gc_dir,
+        sf_fp=sf_fp,
+        fm_run_fp=fm_run_fp,
+        time_wait=time_wait,
+        max_et=max_et
+    )
+
+    # read in the affine correction
+    with open(aff_corr_fp, 'rb') as f:
+        b = np.load(f)
+
+    return f_c - b
+
+
+def adjoint_eval_cf(
+        w,
+        cost_func_fp, gdt_fp, adj_run_fp, mnth_idx_bnd,
+        time_wait, max_eval_time=28800  # default 8 hrs
+):
     """
     Adjoint model evaluation for carbon flux inversion.
 
-    TODO
+    Input is a vector w, and output is the GDT file from GEOS-Chem Adjoint.
+
+    Parameters
+    ----------
+        w             (np arr) : opt variable in first ADMM subopt
+        cost_func_fp  (str)    : file path to cfn.01
+        gdt_fp        (str)    : path to the gradient file (gctm.gdt.01)
+        adj_run_fp    (str)    : adjoint model run script file path
+        mnth_idx_bnd  (int)    : upper bound (inclusive) of month index
+                                 (i.e. 8 == aug)
+        time_wait     (float)  : time to wait between each check for the
+                                 existence of cfn.01
+        max_eval_time (int)    : maximum time (seconds) the code will wait
+
+    Returns
+    -------
+        adj_val  (np arr) : K^T w
+        adj_cost (float)  : cost function evaluation
+
     """
-    pass
+    # delete any currently existing cost/adj file
+    subprocess.run([
+        "rm",
+        cost_func_fp
+    ])
+    subprocess.run([
+        "rm",
+        gdt_fp
+    ])
+
+    # write the input w values to file in GOSAT form
+    # assert files_succ_written  # verify directory created
+
+    # call the adjoint model
+    subprocess.run([
+        "qsub",
+        adj_run_fp
+    ])
+
+    # wait to make sure cfn.01 and gctm.gdt.01 files exists
+    total_sleep = 0
+    while (not exists(cost_func_fp)) or (not exists(gdt_fp)):
+        time.sleep(time_wait)
+        total_sleep += time_wait
+
+        if total_sleep > max_eval_time:
+            raise RuntimeError
+
+    # read in cfn.01
+    adj_cost = read_cfn_file(cfn_fp=cost_func_fp)
+    adj_cost *= 2  # the above returns 1/2 the appropriate value
+
+    # obtain the gradient file
+    gdt = pnc.pncopen(gdt_fp, format='bpch')
+    adj_val = gdt.variables['IJ-GDE-$_CO2bal'].array()[0, :mnth_idx_bnd, :, :]
+
+    return adj_val, adj_cost
