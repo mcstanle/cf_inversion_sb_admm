@@ -11,7 +11,7 @@ Currently supported applications:
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 26, 2023
-Last Modified : Jun 12, 2023
+Last Modified : Jun 13, 2023
 ===============================================================================
 """
 from io_opt import write_sfs_to_file
@@ -19,7 +19,7 @@ import numpy as np
 from os.path import exists
 import pickle
 import subprocess
-from time import time
+import time
 
 
 def forward_eval_unfold(x, K, L_inv):
