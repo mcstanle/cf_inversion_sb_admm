@@ -199,7 +199,7 @@ def forward_linear_eval_cf(
 
 
 def adjoint_eval_cf(
-        w,
+        w, w_save_fp,
         cost_func_fp, gdt_fp, adj_run_fp, mnth_idx_bnd,
         time_wait, max_eval_time=28800  # default 8 hrs
 ):
@@ -211,6 +211,7 @@ def adjoint_eval_cf(
     Parameters
     ----------
         w             (np arr) : opt variable in first ADMM subopt
+        w_save_fp     (str)    : where to save w vector as npy file
         cost_func_fp  (str)    : file path to cfn.01
         gdt_fp        (str)    : path to the gradient file (gctm.gdt.01)
         adj_run_fp    (str)    : adjoint model run script file path
@@ -226,6 +227,12 @@ def adjoint_eval_cf(
         adj_cost (float)  : cost function evaluation
 
     """
+    # create file containing w vector
+    with open(w_save_fp, 'wb') as f:
+        np.save(file=f, arr=w)
+
+    # destination directory i/o
+
     # delete any currently existing cost/adj file
     subprocess.run([
         "rm",
