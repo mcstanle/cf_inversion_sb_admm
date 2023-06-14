@@ -22,7 +22,8 @@ if __name__ == "__main__":
     W_DIR = HOME + '/admm_objects/w_gen_dir_lep'
     COST_FUNC_FP = HOME_RUN + SUB_DIR_FILL + '/OptData/cfn.01'
     GDT_FP = HOME_RUN + SUB_DIR_FILL + '/OptData/gctm.gdt.01'
-    ADJ_RUN_FP = HOME + '/pbs_run_scripts/run_forward_model_osb_lep'
+    ADJ_RUN_FP = '/glade/u/home/mcstanley/pbs_run_scripts'
+    ADJ_RUN_FP += '/run_adjoint_model_osb_admm_lep'
     MNTH_IDX_BND = 9
     YEAR = 2010
     TIME_WAIT = 15
