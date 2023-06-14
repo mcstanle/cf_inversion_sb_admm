@@ -266,7 +266,8 @@ def create_gosat_files(
         # loops through all observations on that day
         gos_new = create_gosat_day(
             obs_list=gos_orig,
-            modeled_obs=new_xco2.loc[day_idx].values  # expects np arr
+            # modeled_obs=new_xco2.loc[day_idx].values  # expects np arr
+            modeled_obs=new_xco2[day_idx]
         )
 
         # write the new file
