@@ -2,11 +2,11 @@
 Utility functions to support the generation of w vector.
 ===============================================================================
 Author        : Mike Stanley
-Created       : Jun 13, 2023
-Last Modified : Jun 13, 2023
+Created       : Jun 14, 2023
+Last Modified : Jun 14, 2023
 ===============================================================================
 """
-from carbonfluxtools.io import create_gosat_df_year, get_ij
+from carbonfluxtools.io_utils import create_gosat_df_year, get_ij
 from datetime import datetime
 import numpy as np
 import os
