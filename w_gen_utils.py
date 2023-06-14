@@ -241,7 +241,7 @@ def create_gosat_files(
     assert os.path.exists(gosat_fp)
 
     # read in new xco2 values
-    with open(xco2_fp) as f:
+    with open(xco2_fp, 'rb') as f:
         new_xco2 = np.load(f)
 
     # for each existing file, generate a new one
