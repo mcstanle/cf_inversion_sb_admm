@@ -21,6 +21,7 @@ import pickle
 import PseudoNetCDF as pnc
 import subprocess
 import time
+from w_gen_utils import create_gosat_files
 
 
 def forward_eval_unfold(x, K, L_inv):
@@ -199,8 +200,8 @@ def forward_linear_eval_cf(
 
 
 def adjoint_eval_cf(
-        w, w_save_fp,
-        cost_func_fp, gdt_fp, adj_run_fp, mnth_idx_bnd,
+        w, w_save_fp, gosat_dir, w_dir, h_tabl_fp,
+        cost_func_fp, gdt_fp, adj_run_fp, mnth_idx_bnd, year,
         time_wait, max_eval_time=28800  # default 8 hrs
 ):
     """
@@ -208,15 +209,25 @@ def adjoint_eval_cf(
 
     Input is a vector w, and output is the GDT file from GEOS-Chem Adjoint.
 
+    Inputs  -- w vector
+    Outputs --
+        - .npy file of w vector
+        - GOSAT directory containing w vector
+        - key value pair in hash table with w: K^Tw
+
     Parameters
     ----------
         w             (np arr) : opt variable in first ADMM subopt
         w_save_fp     (str)    : where to save w vector as npy file
+        gosat_dir     (str)    : directory containing template GOSAT files
+        w_dir         (str)    : directory where w is saved as faux gosat files
+        h_tabl_fp     (str)    : file path to hashtable for w:k^Tw pairs
         cost_func_fp  (str)    : file path to cfn.01
         gdt_fp        (str)    : path to the gradient file (gctm.gdt.01)
         adj_run_fp    (str)    : adjoint model run script file path
         mnth_idx_bnd  (int)    : upper bound (inclusive) of month index
                                  (i.e. 8 == aug)
+        year          (int)    : year of interest
         time_wait     (float)  : time to wait between each check for the
                                  existence of cfn.01
         max_eval_time (int)    : maximum time (seconds) the code will wait
@@ -231,7 +242,15 @@ def adjoint_eval_cf(
     with open(w_save_fp, 'wb') as f:
         np.save(file=f, arr=w)
 
-    # destination directory i/o
+    # generate gosat files containing new w vector
+    files_created = create_gosat_files(
+        xco2_fp=w_save_fp,
+        origin_dir=gosat_dir,
+        save_dir=w_dir,
+        year=year,
+        month=mnth_idx_bnd
+    )
+    assert files_created
 
     # delete any currently existing cost/adj file
     subprocess.run([
@@ -242,9 +261,6 @@ def adjoint_eval_cf(
         "rm",
         gdt_fp
     ])
-
-    # write the input w values to file in GOSAT form
-    # assert files_succ_written  # verify directory created
 
     # call the adjoint model
     subprocess.run([
@@ -268,5 +284,17 @@ def adjoint_eval_cf(
     # obtain the gradient file
     gdt = pnc.pncopen(gdt_fp, format='bpch')
     adj_val = gdt.variables['IJ-GDE-$_CO2bal'].array()[0, :mnth_idx_bnd, :, :]
+
+    # read in file
+    with open(h_tabl_fp, 'rb') as f:
+        adjoint_ht = pickle.load(f)
+
+    # add new key value pair
+    key = hash(w.tobytes())
+    adjoint_ht[key] = adj_val
+
+    # write out new updated hash table
+    with open(h_tabl_fp, 'wb') as f:
+        pickle.dump(adjoint_ht, f)
 
     return adj_val, adj_cost

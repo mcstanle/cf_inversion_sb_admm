@@ -309,7 +309,8 @@ if __name__ == "__main__":
         origin_dir=ORIGIN_DIR,
         save_dir=SAVE_DIR,
         year=YEAR,
-        month=MONTH
+        month=MONTH,
+        disable_tqdm=False
     )
 
     print("Files created successfully: %r" % files_created)

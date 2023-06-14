@@ -48,10 +48,10 @@ Create the following directory structure:
 
 # Certification of Components
 1. Affine Correction Generation
-    1. __Performed__ on 6/13/2023. File saved to `glade/work/mcstanley/admm_objects/fixed_optimization_inputs/affine_correction.npy` by running `python create_affine_correction.py` in Cheyenne.
+    1. __Performed__ successfully on 6/13/2023. File saved to `glade/work/mcstanley/admm_objects/fixed_optimization_inputs/affine_correction.npy` by running `python create_affine_correction.py` in Cheyenne.
     2. Involves correct functionality of `forward_adjoint_evaluators.forward_eval_cf`.
 2. Linear Component of Forward model
     1. `forward_adjoint_evaluators.forward_linear_eval_cf`
 3. File I/O for adjoint model wrapper
     1. Requires reading from existing GOSAT observation directory and creating a new faux-GOSAT observation in which to embed a candidate w vector.
-    2. Tested in `w_gen_utils.py`.
+    2. __Performed__ successfully on 6/14/2023 by running `python w_gen_utils.py`.
