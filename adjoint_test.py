@@ -24,7 +24,7 @@ if __name__ == "__main__":
     GDT_FP = HOME_RUN + SUB_DIR_FILL + '/OptData/gctm.gdt.01'
     ADJ_RUN_FP = '/glade/u/home/mcstanley/pbs_run_scripts'
     ADJ_RUN_FP += '/run_adjoint_model_osb_admm_lep'
-    MNTH_IDX_BND = 9
+    MNTH_IDX_BND = 8
     YEAR = 2010
     TIME_WAIT = 15
 

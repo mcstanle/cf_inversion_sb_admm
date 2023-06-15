@@ -5,8 +5,8 @@ GEOS-Chem/Adj.
 NOTE: copied from ~/Research/Carbon_Flux/optimization/src/computation
 
 Author        : Mike Stanley
-Created       : April 6, 2022
-Last Modified : Jun 12, 2022
+Created       : Apr 6, 2022
+Last Modified : Jun 15, 2023
 ===============================================================================
 """
 from copyreg import pickle
@@ -14,7 +14,7 @@ import numpy as np
 from os.path import exists
 import PseudoNetCDF as pnc
 import pandas as pd
-# import pickle
+import pickle as pkl
 
 
 def write_sfs_to_file(c, fp, n=26496, nprime=298080, nnems_idx=2):
@@ -229,3 +229,24 @@ def move_opt_c_to_start_pos(res_pos, c_write_loc):
     np.save(file=c_write_loc, arr=res[0])
 
     return exists(c_write_loc)
+
+
+def get_KTwk1(w, adjoint_ht_fp):
+    """
+    Obtain the last K^Tw_{k + 1} for the next c sub-opt.
+
+    Parameters
+    ----------
+        w             (np arr) : w for which we want to find K^Tw
+        adjoint_ht_fp (str)    : file path to the adjoint eval hash table
+
+    Returns
+    -------
+        K^T w (np arr) : p x 1
+    """
+    # read in the hash table
+    with open(adjoint_ht_fp, 'rb') as f:
+        adjoint_ht = pkl.load(f)
+
+    w_hash = hash(w.tobytes())
+    return adjoint_ht[w_hash]

@@ -13,7 +13,7 @@ python create_affine_correction.py
 The above saves the output file to `/glade/work/mcstanley/admm_objects/fixed_optimization_inputs/affine_correction.npy`.
 
 ## Run endpoint optimizations
-LEP is run using the bash script `run_lep.sh` and predictably, the UEP optimization is run using `run_uep.sh`. Both of these run the script `run_endpoint_opt_carbon_flux.py` by changing key environmental variables.
+LEP is run using the bash script `run_endpoint_opt_carbon_flux_lep.py` and predictably, the UEP optimization is run using `run_endpoint_opt_carbon_flux_lep.py`
 
 # Required directory structure
 ## Carbon Flux
@@ -55,3 +55,5 @@ Create the following directory structure:
 3. File I/O for adjoint model wrapper
     1. Requires reading from existing GOSAT observation directory and creating a new faux-GOSAT observation in which to embed a candidate w vector.
     2. __Performed__ successfully on 6/14/2023 by running `python w_gen_utils.py`.
+4. Adjoint model evaluation for K^T w
+    1. __Performed__ successfully on 6/14/2023 by running `python adjoint_test.py` using the affine correction as the input w vector.

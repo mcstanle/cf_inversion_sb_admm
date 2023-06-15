@@ -11,7 +11,7 @@ Currently supported applications:
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 26, 2023
-Last Modified : Jun 13, 2023
+Last Modified : Jun 15, 2023
 ===============================================================================
 """
 from io_opt import read_cfn_file, write_sfs_to_file
@@ -234,10 +234,11 @@ def adjoint_eval_cf(
 
     Returns
     -------
-        adj_val  (np arr) : K^T w
-        adj_cost (float)  : cost function evaluation
+        adj_val_flat (np arr) : K^T w
+        adj_cost     (float)  : cost function evaluation
 
     """
+    # TODO - test out if we need a multiplier on w
     # create file containing w vector
     with open(w_save_fp, 'wb') as f:
         np.save(file=f, arr=w)
@@ -285,6 +286,9 @@ def adjoint_eval_cf(
     gdt = pnc.pncopen(gdt_fp, format='bpch')
     adj_val = gdt.variables['IJ-GDE-$_CO2bal'].array()[0, :mnth_idx_bnd, :, :]
 
+    # flatten in C-style (i.e., longitude expanding first)
+    adj_val_flat = adj_val.flatten(order='C')
+
     # read in file
     with open(h_tabl_fp, 'rb') as f:
         adjoint_ht = pickle.load(f)
@@ -297,4 +301,4 @@ def adjoint_eval_cf(
     with open(h_tabl_fp, 'wb') as f:
         pickle.dump(adjoint_ht, f)
 
-    return adj_val, adj_cost
+    return adj_val_flat, adj_cost
