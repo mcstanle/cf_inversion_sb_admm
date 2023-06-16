@@ -16,17 +16,23 @@ import numpy as np
 import os
 
 
-def y_generation(aff_corr_fp, gosat_dir, write_fp):
+def y_generation(aff_corr_fp, gosat_dir, write_fp, year=2010, month=9):
     """
     GOSAT Observation minus affine correction.
 
     NOTE: expects affine correction to be npy file
+
+    NOTE: builds observation from 1/1 of given year through the final day of
+    the month prior to month
 
     Parameters
     ----------
         aff_corr_fp (str) : file location of affine correction
         gosat_dir   (str) : location of GOSAT observation files
         write_fp    (str) : file destination
+        year        (int) : year of interest
+        month       (int) : least ub of month
+
 
     Returns
     -------
@@ -42,6 +48,10 @@ def y_generation(aff_corr_fp, gosat_dir, write_fp):
 
     # read in gosat observations
     gosat_df = create_gosat_df_year(obs_dir=gosat_dir, year=2010)
+
+    # get row indices after month of interest and drop
+    drop_row_indices = gosat_df.index[gosat_df.omonth >= month].tolist()
+    gosat_df.drop(labels=drop_row_indices, axis=0, inplace=True)
 
     # corrected observations
     y = gosat_df['xco2'].values - b
