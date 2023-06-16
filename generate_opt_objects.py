@@ -83,10 +83,12 @@ if __name__ == '__main__':
     AFF_CORR_FP = OBJ_DEST_DIR + '/affine_correction.npy'
     GOSAT_DIR = BASE_DIR + '/Data/OSSE_OBS'
     OBS_WRITE_FP = OBJ_DEST_DIR + '/y_affine_corrected.npy'
+
+    print('Observation generation...')
     y_generation(
         aff_corr_fp=AFF_CORR_FP,
         gosat_dir=GOSAT_DIR,
-        write_path=OBS_WRITE_FP
+        write_fp=OBS_WRITE_FP
     )
 
     # constraints
