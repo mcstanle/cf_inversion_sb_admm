@@ -77,7 +77,7 @@ if __name__ == '__main__':
 
     # base directories
     BASE_DIR = '/glade/work/mcstanley'
-    OBJ_DEST_DIR = BASE_DIR + '/admm_objects/fixed_optimization_objects'
+    OBJ_DEST_DIR = BASE_DIR + '/admm_objects/fixed_optimization_inputs'
 
     # affine corrected observation
     AFF_CORR_FP = OBJ_DEST_DIR + '/affine_correction.npy'
