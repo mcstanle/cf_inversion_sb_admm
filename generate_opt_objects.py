@@ -57,7 +57,7 @@ def y_generation(aff_corr_fp, gosat_dir, write_fp, year=2010, month=9):
     y = gosat_df['xco2'].values - b
 
     # write to file
-    with open(write_fp, 'rb') as f:
+    with open(write_fp, 'wb') as f:
         np.save(file=f, arr=y)
 
     return os.path.exists(write_fp)
