@@ -140,7 +140,7 @@ if __name__ == "__main__":
     lambda_sp = np.zeros(p)
 
     # read in the optimized slack factor
-    SLACK_F_FP = HOME + '/strict_bounds_admm/slack_opt/opt_res_cont.pkl'
+    SLACK_F_FP = WORK + '/admm_objects/slack_opt/opt_res_cont.pkl'
     with open(SLACK_F_FP, 'rb') as f:
         opt_slack = pickle.load(f)
     PSI2 = stats.chi2.ppf(q=.95, df=1) + opt_slack[1]

@@ -106,12 +106,12 @@ def A_b_generation(box_constraint_fp):
     # lower bounds
     for i in range(lb_idxs.shape[0]):
         A[i, lb_idxs[i]] = -1
-        b[i] = - bnds[lb_idxs[i][0]]
+        b[i] = - bnds[lb_idxs[i], 0]
 
     # upper bounds
     for i in range(lb_idxs.shape[0], tot_constr_count):
         A[i, ub_idxs[i]] = 1
-        b[i] = bnds[ub_idxs[i][1]]
+        b[i] = bnds[ub_idxs[i], 1]
 
     return A, b
 
