@@ -104,14 +104,14 @@ def A_b_generation(box_constraint_fp):
     b = np.zeros(tot_constr_count)
 
     # lower bounds
-    for i in range(lb_idxs.shape[0]):
-        A[i, lb_idxs[i]] = -1
-        b[i] = - bnds[lb_idxs[i], 0]
+    for i, lb_idx_i in zip(range(lb_idxs.shape[0]), lb_idxs):
+        A[i, lb_idx_i] = -1
+        b[i] = - bnds[lb_idx_i, 0]
 
     # upper bounds
-    for i in range(lb_idxs.shape[0], tot_constr_count):
-        A[i, ub_idxs[i]] = 1
-        b[i] = bnds[ub_idxs[i], 1]
+    for i, ub_idx_i in zip(range(lb_idxs.shape[0], tot_constr_count), ub_idxs):
+        A[i, ub_idx_i] = 1
+        b[i] = bnds[ub_idx_i, 1]
 
     return A, b
 
