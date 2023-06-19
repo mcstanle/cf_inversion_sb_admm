@@ -140,9 +140,7 @@ def starting_point_generation(m, d, p, random_seed):
         w_sp, c_sp, lambda_sp (np arrs) : starting vectors
     """
     np.random.seed(random_seed)
-    w_sp = stats.multivariate_normal(
-        mean=np.zeros(m), cov=np.identity(m)
-    ).rvs()
+    w_sp = stats.norm().rvs(m)
     c_sp = np.zeros(d)
     lambda_sp = np.zeros(p)
 
