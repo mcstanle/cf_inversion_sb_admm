@@ -72,7 +72,8 @@ if __name__ == "__main__":
 
     # check if necessary directories exist
     check_directories(
-        sat_obs=SAT_OBS
+        sat_obs=SAT_OBS,
+        save_dir=SAVE_DIR
     )
 
     # directory for adjoint eval hash table
@@ -105,6 +106,7 @@ if __name__ == "__main__":
     get_KTwk1_par = partial(
         get_KTwk1, adjoint_ht_fp=ADJOINT_EVAL_HT_FP
     )
+    print('Defined forward and adjoint model wrappers.')
 
     # read in y observation
     OBJ_DEST_DIR = WORK + '/admm_objects/fixed_optimization_inputs'
