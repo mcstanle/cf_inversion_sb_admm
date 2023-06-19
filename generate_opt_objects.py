@@ -3,17 +3,21 @@ This script can generate the following objects which are inputs to the
 endpoint optimizations.
 1. y_generation --> GOSAT - affine correction observations to use in algo
 2. A_b_generation --> polyhedra constraints for scaling factors
+    - use the previously generated constraints found in
+    /glade/u/home/mcstanley/strict_bounds/lbfgsb_optimizer/data/sign_corrected
+    /scipy_bnds.pkl
 3. h_generation --> functional generation
 4. starting_point_generation --> starting vectors for w, c, and lambda
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 16, 2023
-Last Modified : Jun 16, 2023
+Last Modified : Jun 19, 2023
 ===============================================================================
 """
 from carbonfluxtools.io_utils import create_gosat_df_year
 import numpy as np
 import os
+import pickle
 
 
 def y_generation(aff_corr_fp, gosat_dir, write_fp, year=2010, month=9):
@@ -63,16 +67,58 @@ def y_generation(aff_corr_fp, gosat_dir, write_fp, year=2010, month=9):
     return os.path.exists(write_fp)
 
 
-def A_b_generation():
+def A_b_generation(box_constraint_fp):
     """
-    Polyhedra constraints for scaling factors.
+    Creates A and b objects using the box constraints previously found (see
+    above).
+
+    There are three disjoint groups of bounds
+    1. unbounded
+    2. lower bounded (m)
+    3. upper bounded (n)
+
+    By convention, lower bounds come first in the rows of A
+
+    Parameters
+    ----------
+        box_constraint_fp (str) : file path to file containing box constraints
+                                  in tuples.
+
+    Returns
+    -------
+        A (np arr) : dimension (n + m) x p
+        b (np arr) : dimension n + m
     """
-    pass
+    # import the constraints and tranlate list tup to numpy arr
+    with open(box_constraint_fp, 'rb') as f:
+        bnds = np.array(pickle.load(f))
+
+    # find indices of bounds
+    orig_dim = bnds.shape[0]
+    lb_idxs = np.where(bnds[:, 0] > -np.inf)[0]
+    ub_idxs = np.where(bnds[:, 1] < np.inf)[0]
+    tot_constr_count = lb_idxs.shape[0] + ub_idxs.shape[0]
+
+    # make output objects
+    A = np.zeros(shape=(tot_constr_count, orig_dim))
+    b = np.zeros(tot_constr_count)
+
+    # lower bounds
+    for i in range(lb_idxs.shape[0]):
+        A[i, lb_idxs[i]] = -1
+        b[i] = - bnds[lb_idxs[i][0]]
+
+    # upper bounds
+    for i in range(lb_idxs.shape[0], tot_constr_count):
+        A[i, ub_idxs[i]] = 1
+        b[i] = bnds[ub_idxs[i][1]]
+
+    return A, b
 
 
 def h_generation():
     """
-    Generate functional of interest.
+    Already done in ../src/data/build_functionals.py.
     """
     pass
 
@@ -81,6 +127,7 @@ def starting_point_generation():
     """
     Starting vectors for w, c, lambda.
     """
+    pass
 
 
 if __name__ == '__main__':
@@ -95,7 +142,7 @@ if __name__ == '__main__':
     OBS_WRITE_FP = OBJ_DEST_DIR + '/y_affine_corrected.npy'
 
     print('Observation generation...')
-    y_generation(
+    y_gen_succ = y_generation(
         aff_corr_fp=AFF_CORR_FP,
         gosat_dir=GOSAT_DIR,
         write_fp=OBS_WRITE_FP
@@ -109,3 +156,6 @@ if __name__ == '__main__':
 
     # starting points
     starting_point_generation()
+
+    # check success
+    assert y_gen_succ

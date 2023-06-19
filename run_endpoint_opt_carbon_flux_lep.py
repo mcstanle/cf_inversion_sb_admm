@@ -4,29 +4,37 @@ is called for LEP optimization.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Jun 16, 2023
+Last Modified : Jun 19, 2023
 ===============================================================================
 """
 from admm_optimizer import run_admm
 from forward_adjoint_evaluators import forward_linear_eval_cf, adjoint_eval_cf
 from functools import partial
+from generate_opt_objects import (
+    A_b_generation
+)
 from io_opt import get_KTwk1
+import numpy as np
 import os
+import pickle
+from scipy import stats
 
 
-def check_directories(sat_obs):
+def check_directories(sat_obs, save_dir):
     """
     Checks for the existence of necessary directories.
 
     Parameters
     ----------
-        sat_obs (str) : satellite observation directory
+        sat_obs  (str) : satellite observation directory
+        save_dir (str) : directory to store output dictionary
 
     Returns
     -------
         None -- halts code if one directory does not exist.
     """
     assert os.path.isdir(sat_obs)
+    assert os.path.isdir(save_dir)
 
 
 if __name__ == "__main__":
@@ -34,10 +42,11 @@ if __name__ == "__main__":
     # operational parameters
     LEP_OPT = True
     MAX_ITERS = 1
-    SUBOPT_ITERS = 1
+    SUBOPT_ITERS = 2
     TIME_2_WAIT = 15  # seconds between each check for file existence
     YEAR = 2010
     MONTH_IDX = 8
+    MU = 1e3  # penalty parameter enforcing feasibility
 
     # define necessary directories
     HOME = '/glade/u/home/mcstanley'
@@ -45,16 +54,19 @@ if __name__ == "__main__":
     SUB_DIR_FILL = '/runs/v8-02-01/geos5'
     WORK = '/glade/work/mcstanley'
     SAT_OBS = WORK + '/Data/OSSE_OBS'
-    GC_DIR = HOME + "/gc_adj_runs/forward_model_osb_lep"
+    GC_DIR = HOME + '/gc_adj_runs/forward_model_osb_lep'
     W_DIR = WORK + '/admm_objects/w_gen_dir_lep'
+
+    # end result save location
+    SAVE_DIR = WORK + '/admm_objects/results/test'
 
     # define necessary file paths
     AFFINE_CORR_FP = WORK + '/admm_objects/fixed_optimization_inputs'
     AFFINE_CORR_FP += '/affine_correction.npy'
-    SF_F_FP = WORK + "/Data/osb_endpoint_sfs/lep_sfs_forward.txt"
+    SF_F_FP = WORK + '/Data/osb_endpoint_sfs/lep_sfs_forward.txt'
     FM_RUN_FP = HOME + '/pbs_run_scripts/run_forward_model_osb_lep'
     ADJ_RUN_FP = HOME + '/pbs_run_scripts/run_adjoint_model_osb_admm_lep'
-    W_SAVE_FP = WORK + '/admm_objects/w_vec.npy'
+    W_SAVE_FP = WORK + '/admm_objects/w_vecs/w_vec_lep.npy'
     COST_FUNC_FP = HOME_RUN + SUB_DIR_FILL + '/OptData/cfn.01'
     GDT_FP = HOME_RUN + SUB_DIR_FILL + '/OptData/gctm.gdt.01'
 
@@ -94,10 +106,50 @@ if __name__ == "__main__":
         get_KTwk1, adjoint_ht_fp=ADJOINT_EVAL_HT_FP
     )
 
+    # read in y observation
+    OBJ_DEST_DIR = WORK + '/admm_objects/fixed_optimization_inputs'
+    OBS_WRITE_FP = OBJ_DEST_DIR + '/y_affine_corrected.npy'
+    with open(OBS_WRITE_FP, 'rb') as f:
+        y_obs = np.load(f)
+    print('Affine Corrected observation obtained.')
+
+    # obtain A and b constraint objects
+    CONSTR_DIR = HOME + '/strict_bounds/lbfgsb_optimizer/data/sign_corrected'
+    A, b = A_b_generation(
+        box_constraint_fp=CONSTR_DIR + '/scipy_bnds.pkl'
+    )
+    print('Constraints obtained.')
+
+    # import functional
+    FUNC_FP = HOME + '/strict_bounds/lbfgsb_optimizer/data'
+    FUNC_FP += '/na_june_functional.npy'
+    with open(FUNC_FP, 'rb') as f:
+        h = np.load(f)
+    print(f'Functional acquired from {FUNC_FP}')
+
+    # generate starting positions
+    m = y_obs.shape[0]
+    d = b.shape[0]
+    p = A.shape[1]
+
+    np.random.seed(12345)
+    w_sp = stats.multivariate_normal(
+        mean=np.zeros(m), cov=np.identity(m)
+    ).rvs()
+    c_sp = np.zeros(d)
+    lambda_sp = np.zeros(p)
+
+    # read in the optimized slack factor
+    SLACK_F_FP = HOME + '/strict_bounds_admm/slack_opt/opt_res_cont.pkl'
+    with open(SLACK_F_FP, 'rb') as f:
+        opt_slack = pickle.load(f)
+    PSI2 = stats.chi2.ppf(q=.95, df=1) + opt_slack[1]
+    print(f'Resid Norm constraint = {PSI2: .3f}')
+
     # run optimization
     print('Running ADMM...')
     res_dict = run_admm(
-        y=y_tilde,
+        y=y_obs,
         A=A,
         b=b,
         h=h,
@@ -105,7 +157,7 @@ if __name__ == "__main__":
         c_start=c_sp,
         lambda_start=lambda_sp,
         mu=MU,
-        psi_alpha=np.sqrt(psi_alpha_sq),
+        psi_alpha=np.sqrt(PSI2),
         forward_eval=forward_eval,
         adjoint_eval=adjoint_eval,
         get_KTwk1=get_KTwk1_par,
@@ -114,3 +166,7 @@ if __name__ == "__main__":
         subopt_iters=SUBOPT_ITERS,
         adjoint_ht_fp=ADJOINT_EVAL_HT_FP
     )
+
+    # save the above output
+    with open(SAVE_DIR + '/test_run.pkl', 'wb') as f:
+        pickle.dump(res_dict, f)
