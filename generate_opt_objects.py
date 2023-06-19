@@ -18,6 +18,7 @@ from carbonfluxtools.io_utils import create_gosat_df_year
 import numpy as np
 import os
 import pickle
+from scipy import stats
 
 
 def y_generation(aff_corr_fp, gosat_dir, write_fp, year=2010, month=9):
@@ -123,11 +124,29 @@ def h_generation():
     pass
 
 
-def starting_point_generation():
+def starting_point_generation(m, d, p, random_seed):
     """
     Starting vectors for w, c, lambda.
+
+    Parameters
+    ----------
+        m           (np arr) : observation dimension
+        d           (np arr) : constraint dimension
+        p           (np arr) : sf vector dimension
+        random_seed (int)    :
+
+    Returns
+    -------
+        w_sp, c_sp, lambda_sp (np arrs) : starting vectors
     """
-    pass
+    np.random.seed(random_seed)
+    w_sp = stats.multivariate_normal(
+        mean=np.zeros(m), cov=np.identity(m)
+    ).rvs()
+    c_sp = np.zeros(d)
+    lambda_sp = np.zeros(p)
+
+    return w_sp, c_sp, lambda_sp
 
 
 if __name__ == '__main__':

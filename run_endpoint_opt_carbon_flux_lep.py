@@ -11,7 +11,8 @@ from admm_optimizer import run_admm
 from forward_adjoint_evaluators import forward_linear_eval_cf, adjoint_eval_cf
 from functools import partial
 from generate_opt_objects import (
-    A_b_generation
+    A_b_generation,
+    starting_point_generation
 )
 from io_opt import get_KTwk1
 import numpy as np
@@ -134,12 +135,10 @@ if __name__ == "__main__":
     d = b.shape[0]
     p = A.shape[1]
 
-    np.random.seed(12345)
-    w_sp = stats.multivariate_normal(
-        mean=np.zeros(m), cov=np.identity(m)
-    ).rvs()
-    c_sp = np.zeros(d)
-    lambda_sp = np.zeros(p)
+    w_sp, c_sp, lambda_sp = starting_point_generation(
+        m=m, d=d, p=p,
+        random_seed=12345
+    )
 
     # read in the optimized slack factor
     SLACK_F_FP = WORK + '/admm_objects/slack_opt/opt_res_cont.pkl'
