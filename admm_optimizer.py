@@ -105,7 +105,7 @@ def w_update_obj_grad(
     lep_switch = -1 if lep else 1
 
     # adjoint evaluation K^T w
-    KTw = adjoint_eval(w)
+    KTw, adj_cost = adjoint_eval(w)
 
     # construct input for forward model run
     f_model_input = lambda_k - mu_k * KTw + mu_k * h
