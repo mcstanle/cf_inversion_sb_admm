@@ -297,7 +297,7 @@ def adjoint_eval_cf(
 
     # add new key value pair
     key = hash(w.tobytes())
-    adjoint_ht[key] = adj_val
+    adjoint_ht[key] = adj_val_flat
 
     # write out new updated hash table
     with open(h_tabl_fp, 'wb') as f:

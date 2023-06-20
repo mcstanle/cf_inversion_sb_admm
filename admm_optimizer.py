@@ -21,7 +21,7 @@ TODO:
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 24, 2023
-Last Modified : Jun 01, 2023
+Last Modified : Jun 20, 2023
 ===============================================================================
 """
 import numpy as np
@@ -63,7 +63,7 @@ def w_update_obj(
     lep_switch = -1 if lep else 1
 
     # call adjoint model to get K^T w evaluation
-    KTw = adjoint_eval(w)  # TODO -- any other I/O checks required here?
+    KTw, adj_cost = adjoint_eval(w)  # TODO -- any other I/O checks required?
 
     return_val = psi_alpha * np.linalg.norm(w) + lep_switch * np.dot(w, y)
     return_val -= lambda_k.T @ KTw
