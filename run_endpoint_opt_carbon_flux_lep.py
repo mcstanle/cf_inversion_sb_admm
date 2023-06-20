@@ -4,7 +4,7 @@ is called for LEP optimization.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Jun 19, 2023
+Last Modified : Jun 20, 2023
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     SUBOPT_ITERS = 2
     TIME_2_WAIT = 15  # seconds between each check for file existence
     YEAR = 2010
-    MONTH_IDX = 8
+    MONTH_IDX = 9
     MU = 1e3  # penalty parameter enforcing feasibility
 
     # define necessary directories

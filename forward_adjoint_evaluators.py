@@ -11,7 +11,7 @@ Currently supported applications:
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 26, 2023
-Last Modified : Jun 15, 2023
+Last Modified : Jun 20, 2023
 ===============================================================================
 """
 from io_opt import read_cfn_file, write_sfs_to_file
@@ -284,7 +284,9 @@ def adjoint_eval_cf(
 
     # obtain the gradient file
     gdt = pnc.pncopen(gdt_fp, format='bpch')
-    adj_val = gdt.variables['IJ-GDE-$_CO2bal'].array()[0, :mnth_idx_bnd, :, :]
+    adj_val = gdt.variables['IJ-GDE-$_CO2bal'].array()[
+        0, :(mnth_idx_bnd - 1), :, :
+    ]
 
     # flatten in C-style (i.e., longitude expanding first)
     adj_val_flat = adj_val.flatten(order='C')
