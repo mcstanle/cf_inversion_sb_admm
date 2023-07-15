@@ -21,7 +21,7 @@ TODO:
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 24, 2023
-Last Modified : Jun 20, 2023
+Last Modified : Jul 15, 2023
 ===============================================================================
 """
 import numpy as np
@@ -196,10 +196,29 @@ def endpoint_objective(w, c, b, y, lep, psi_alpha):
     return return_val
 
 
+def callback_save_iters(xk, save_loc):
+    """
+    Callback function to save the values of the optimization
+
+    NOTE: this function appends to the file, so use appropriately.
+
+    Parameters:
+    -----------
+        xk       (np arr) : current optimizer variable value
+        save_loc (str)    : save location
+
+    Returns:
+    --------
+        None
+    """
+    with open(save_loc, 'a') as f:
+        np.savetxt(fname=f, X=xk)
+
+
 def run_admm(
     y, A, b, h, w_start, c_start, lambda_start, mu, psi_alpha,
     forward_eval, adjoint_eval, get_KTwk1,
-    lep, max_iters, subopt_iters,
+    lep, max_iters, maxls, w_callback, subopt_iters,
     adjoint_ht_fp
 ):
     """
@@ -208,7 +227,7 @@ def run_admm(
     NOTE: this function currently only supports constant mu.
 
     Sub-optimization details
-    1. w optimization is performed with BFGS
+    1. w optimization is performed with L-BFGS
     2. c optimization is performed with L-BFGS-B
 
     Parameters
@@ -227,6 +246,8 @@ def run_admm(
         mu            (float)  : penalty parameter
         lep           (bool)   : True if solving for the lower endpoint
         max_iters     (int)    : max number of outer loop ADMM iterations
+        maxls         (int)    : max number of line search steps
+        w_callback    (func)   : callback function to save output w
         subopt_iters  (int)    : max number of iterations for w optimization
         adjoint_ht_fp (str)    : filepath to hashtable for storing adjoint vals
 
@@ -278,8 +299,12 @@ def run_admm(
                 forward_eval, adjoint_eval,
                 y, A, b, h
             ),
-            method='BFGS',
-            options={'maxiter': subopt_iters}
+            method='L-BFGS-B',
+            options={
+                'maxiter': subopt_iters,
+                'maxls': maxls
+            },
+            callback=w_callback
         )
         w_k = w_opt_res['x']
         w_opt_status[k] = w_opt_res['success']

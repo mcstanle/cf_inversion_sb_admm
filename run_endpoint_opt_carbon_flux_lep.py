@@ -4,10 +4,10 @@ is called for LEP optimization.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Jul 09, 2023
+Last Modified : Jul 15, 2023
 ===============================================================================
 """
-from admm_optimizer import run_admm
+from admm_optimizer import callback_save_iters, run_admm
 from forward_adjoint_evaluators import forward_linear_eval_cf, adjoint_eval_cf
 from functools import partial
 from generate_opt_objects import (
@@ -44,6 +44,7 @@ if __name__ == "__main__":
     LEP_OPT = True
     MAX_ITERS = 1
     SUBOPT_ITERS = 2
+    MAXLS = 5         # max number of line search steps in w opt
     TIME_2_WAIT = 15  # seconds between each check for file existence
     YEAR = 2010
     MONTH_IDX = 9
@@ -70,6 +71,10 @@ if __name__ == "__main__":
     W_SAVE_FP = WORK + '/admm_objects/w_vecs/w_vec_lep.npy'
     COST_FUNC_FP = HOME_RUN + SUB_DIR_FILL + '/OptData/cfn.01'
     GDT_FP = HOME_RUN + SUB_DIR_FILL + '/OptData/gctm.gdt.01'
+    CALLBACK_LOC = WORK + '/admm_objects/callback_w_opt.txt'
+
+    # wrapper for callback function
+    callback_f = partial(callback_save_iters, save_loc=CALLBACK_LOC)
 
     # check if necessary directories exist
     check_directories(
@@ -164,6 +169,8 @@ if __name__ == "__main__":
         get_KTwk1=get_KTwk1_par,
         lep=LEP_OPT,
         max_iters=MAX_ITERS,
+        maxls=MAXLS,
+        w_callback=callback_f,
         subopt_iters=SUBOPT_ITERS,
         adjoint_ht_fp=ADJOINT_EVAL_HT_FP
     )
