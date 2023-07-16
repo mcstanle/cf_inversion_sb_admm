@@ -21,7 +21,7 @@ TODO:
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 24, 2023
-Last Modified : Jul 15, 2023
+Last Modified : Jul 16, 2023
 ===============================================================================
 """
 import numpy as np
@@ -306,6 +306,11 @@ def run_admm(
             },
             callback=w_callback
         )
+        # NOTE: remove later
+        SAVE_PATH = '/glade/work/mcstanley/admm_objects/res_text.pkl'
+        with open(SAVE_PATH, 'wb') as f:
+            pickle.dump(obj=w_opt_res, file=f)
+
         w_k = w_opt_res['x']
         w_opt_status[k] = w_opt_res['success']
         w_opt_nfev[k] = w_opt_res['nfev']
