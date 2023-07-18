@@ -6,7 +6,7 @@ NOTE: copied from ~/Research/Carbon_Flux/optimization/src/computation
 
 Author        : Mike Stanley
 Created       : Apr 6, 2022
-Last Modified : Jun 15, 2023
+Last Modified : Jul 18, 2023
 ===============================================================================
 """
 from copyreg import pickle
@@ -249,4 +249,4 @@ def get_KTwk1(w, adjoint_ht_fp):
         adjoint_ht = pkl.load(f)
 
     w_hash = hash(w.tobytes())
-    return adjoint_ht[w_hash]
+    return adjoint_ht[w_hash]['KTw']

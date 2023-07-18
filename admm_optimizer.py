@@ -21,7 +21,7 @@ TODO:
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 24, 2023
-Last Modified : Jul 16, 2023
+Last Modified : Jul 17, 2023
 ===============================================================================
 """
 import numpy as np
@@ -285,6 +285,8 @@ def run_admm(
 
     for k in range(max_iters):
 
+        print(f'--- Iteration {k} ---')
+
         # create a hash table for the adjoint evaluations
         with open(adjoint_ht_fp, 'wb') as f:
             pickle.dump({0: None}, f)
@@ -302,19 +304,20 @@ def run_admm(
             method='L-BFGS-B',
             options={
                 'maxiter': subopt_iters,
-                'maxls': maxls
+                'maxls': maxls,
+                'iprint': 99
             },
             callback=w_callback
         )
         # NOTE: remove later
-        SAVE_PATH = '/glade/work/mcstanley/admm_objects/res_text.pkl'
-        with open(SAVE_PATH, 'wb') as f:
-            pickle.dump(obj=w_opt_res, file=f)
+        # SAVE_PATH = '/glade/work/mcstanley/admm_objects/res_text.pkl'
+        # with open(SAVE_PATH, 'wb') as f:
+        #     pickle.dump(obj=w_opt_res, file=f)
 
         w_k = w_opt_res['x']
         w_opt_status[k] = w_opt_res['success']
         w_opt_nfev[k] = w_opt_res['nfev']
-        w_opt_njev[k] = w_opt_res['njev']
+        # w_opt_njev[k] = w_opt_res['njev']
 
         # access K^T w_{k + 1}
         KTwk1 = get_KTwk1(w_k)

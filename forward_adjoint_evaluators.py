@@ -11,7 +11,7 @@ Currently supported applications:
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 26, 2023
-Last Modified : Jun 20, 2023
+Last Modified : Jul 18, 2023
 ===============================================================================
 """
 from io_opt import read_cfn_file, write_sfs_to_file
@@ -297,7 +297,10 @@ def adjoint_eval_cf(
 
     # add new key value pair
     key = hash(w.tobytes())
-    adjoint_ht[key] = adj_val_flat
+    adjoint_ht[key] = {
+        'KTw': adj_val_flat,
+        'w': w
+    }
 
     # write out new updated hash table
     with open(h_tabl_fp, 'wb') as f:
