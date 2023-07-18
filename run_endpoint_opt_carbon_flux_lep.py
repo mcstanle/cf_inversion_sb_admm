@@ -44,7 +44,7 @@ if __name__ == "__main__":
     LEP_OPT = True
     MAX_ITERS = 1
     SUBOPT_ITERS = 2
-    MAXLS = 5         # max number of line search steps in w opt
+    MAXLS = 3         # max number of line search steps in w opt
     TIME_2_WAIT = 15  # seconds between each check for file existence
     YEAR = 2010
     MONTH_IDX = 9

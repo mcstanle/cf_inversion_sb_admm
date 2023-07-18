@@ -310,9 +310,9 @@ def run_admm(
             callback=w_callback
         )
         # NOTE: remove later
-        # SAVE_PATH = '/glade/work/mcstanley/admm_objects/res_text.pkl'
-        # with open(SAVE_PATH, 'wb') as f:
-        #     pickle.dump(obj=w_opt_res, file=f)
+        SAVE_PATH = f'/glade/work/mcstanley/admm_objects/res_text{k}.pkl'
+        with open(SAVE_PATH, 'wb') as f:
+            pickle.dump(obj=w_opt_res, file=f)
 
         w_k = w_opt_res['x']
         w_opt_status[k] = w_opt_res['success']
