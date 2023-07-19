@@ -21,7 +21,7 @@ TODO:
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 24, 2023
-Last Modified : Jul 17, 2023
+Last Modified : Jul 19, 2023
 ===============================================================================
 """
 import numpy as np
@@ -292,6 +292,7 @@ def run_admm(
             pickle.dump({0: None}, f)
 
         # w - update
+        print(f'- w opt : iteration {k} -')
         w_opt_res = minimize(
             fun=w_update_obj,
             x0=w_k,
@@ -324,9 +325,10 @@ def run_admm(
         KTw_vecs[k, :] = KTwk1
 
         # delete the hash table
-        os.remove(adjoint_ht_fp)
+        # os.remove(adjoint_ht_fp)
 
         # c - update
+        print(f'- c opt : iteration {k} -')
         c_opt_res = minimize(
             fun=c_update_obj,
             x0=c_k,
@@ -336,13 +338,16 @@ def run_admm(
             ),
             bounds=[(0, np.inf)] * d,
             method='L-BFGS-B',
-            options={'maxls': 50}
+            options={
+                'maxls': 50,
+                'disp': True
+            }
         )
         c_k = c_opt_res['x']
         c_opt_status[k] = c_opt_res['success']
         c_opt_messages[k] = c_opt_res['message']
         c_opt_nfev[k] = c_opt_res['nfev']
-        c_opt_njev[k] = c_opt_res['njev']
+        # c_opt_njev[k] = c_opt_res['njev']
 
         # dual variable update
         lambda_k += mu * (h - lep_switch * A.T @ c_k - KTwk1)
