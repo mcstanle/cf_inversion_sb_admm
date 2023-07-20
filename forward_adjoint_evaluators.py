@@ -263,47 +263,50 @@ def adjoint_eval_cf(
         gdt_fp
     ])
 
-    # call the adjoint model
-    subprocess.run([
-        "qsub",
-        adj_run_fp
-    ])
-
-    # wait to make sure cfn.01 and gctm.gdt.01 files exists
-    total_sleep = 0
-    while (not exists(cost_func_fp)) or (not exists(gdt_fp)):
-        time.sleep(time_wait)
-        total_sleep += time_wait
-
-        if total_sleep > max_eval_time:
-            raise RuntimeError
-
-    # read in cfn.01
-    adj_cost = read_cfn_file(cfn_fp=cost_func_fp)
-    adj_cost *= 2  # the above returns 1/2 the appropriate value
-
-    # obtain the gradient file
-    gdt = pnc.pncopen(gdt_fp, format='bpch')
-    adj_val = gdt.variables['IJ-GDE-$_CO2bal'].array()[
-        0, :(mnth_idx_bnd - 1), :, :
-    ]
-
-    # flatten in C-style (i.e., longitude expanding first)
-    adj_val_flat = adj_val.flatten(order='C')
-
-    # read in file
+    # check to see if the adjoint has already been run for this w
     with open(h_tabl_fp, 'rb') as f:
         adjoint_ht = pickle.load(f)
-
-    # add new key value pair
     key = hash(w.tobytes())
-    adjoint_ht[key] = {
-        'KTw': adj_val_flat,
-        'w': w
-    }
+    if key in adjoint_ht:
+        return adjoint_ht[key]['KTw'], 0.0
+    else:
 
-    # write out new updated hash table
-    with open(h_tabl_fp, 'wb') as f:
-        pickle.dump(adjoint_ht, f)
+        # call the adjoint model
+        subprocess.run([
+            "qsub",
+            adj_run_fp
+        ])
 
-    return adj_val_flat, adj_cost
+        # wait to make sure cfn.01 and gctm.gdt.01 files exists
+        total_sleep = 0
+        while (not exists(cost_func_fp)) or (not exists(gdt_fp)):
+            time.sleep(time_wait)
+            total_sleep += time_wait
+
+            if total_sleep > max_eval_time:
+                raise RuntimeError
+
+        # read in cfn.01
+        adj_cost = read_cfn_file(cfn_fp=cost_func_fp)
+        adj_cost *= 2  # the above returns 1/2 the appropriate value
+
+        # obtain the gradient file
+        gdt = pnc.pncopen(gdt_fp, format='bpch')
+        adj_val = gdt.variables['IJ-GDE-$_CO2bal'].array()[
+            0, :(mnth_idx_bnd - 1), :, :
+        ]
+
+        # flatten in C-style (i.e., longitude expanding first)
+        adj_val_flat = adj_val.flatten(order='C')
+
+        # add new key value pair
+        adjoint_ht[key] = {
+            'KTw': adj_val_flat,
+            'w': w
+        }
+
+        # write out new updated hash table
+        with open(h_tabl_fp, 'wb') as f:
+            pickle.dump(adjoint_ht, f)
+
+        return adj_val_flat, adj_cost
