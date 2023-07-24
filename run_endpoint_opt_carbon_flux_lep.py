@@ -4,7 +4,7 @@ is called for LEP optimization.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Jul 15, 2023
+Last Modified : Jul 24, 2023
 ===============================================================================
 """
 from admm_optimizer import callback_save_iters, run_admm
@@ -17,6 +17,7 @@ from generate_opt_objects import (
 from io_opt import get_KTwk1
 import numpy as np
 import os
+import pandas as pd
 import pickle
 from scipy import stats
 
@@ -55,6 +56,7 @@ if __name__ == "__main__":
     HOME_RUN = HOME + '/gc_adj_runs/adjoint_model_osb_admm_lep'
     SUB_DIR_FILL = '/runs/v8-02-01/geos5'
     WORK = '/glade/work/mcstanley'
+    WORK_P_FIX = WORK + '/admm_objects/fixed_optimization_inputs'
     SAT_OBS = WORK + '/Data/OSSE_OBS'
     GC_DIR = HOME + '/gc_adj_runs/forward_model_osb_lep'
     W_DIR = WORK + '/admm_objects/w_gen_dir_lep'
@@ -63,8 +65,8 @@ if __name__ == "__main__":
     SAVE_DIR = WORK + '/admm_objects/results/test'
 
     # define necessary file paths
-    AFFINE_CORR_FP = WORK + '/admm_objects/fixed_optimization_inputs'
-    AFFINE_CORR_FP += '/affine_correction.npy'
+    AFFINE_CORR_FP = WORK_P_FIX + '/affine_correction.npy'
+    GOSAT_DF_FP = WORK_P_FIX + '/gosat_df_jan1_aug31_2010.csv'
     SF_F_FP = WORK + '/Data/osb_endpoint_sfs/lep_sfs_forward.txt'
     FM_RUN_FP = HOME + '/pbs_run_scripts/run_forward_model_osb_lep'
     ADJ_RUN_FP = HOME + '/pbs_run_scripts/run_adjoint_model_osb_admm_lep'
@@ -85,9 +87,14 @@ if __name__ == "__main__":
     # directory for adjoint eval hash table
     ADJOINT_EVAL_HT_FP = WORK + '/admm_objects/h_table_lep.pkl'
 
+    # create the observation covariance cholesky decomp vector -- L^{-1}
+    gosat_df = pd.read_csv(GOSAT_DF_FP)
+    L_inv_vec = 1 / gosat_df.xco2_unc.values
+
     # create wrappers around fuctions involving K matrix
     forward_eval = partial(
         forward_linear_eval_cf,
+        L_inv=L_inv_vec,
         aff_corr_fp=AFFINE_CORR_FP,
         gc_dir=GC_DIR,
         sf_fp=SF_F_FP,
@@ -97,6 +104,7 @@ if __name__ == "__main__":
     )
     adjoint_eval = partial(
         adjoint_eval_cf,
+        L_inv=L_inv_vec,
         w_save_fp=W_SAVE_FP,
         gosat_dir=SAT_OBS,
         w_dir=W_DIR,

@@ -11,7 +11,7 @@ Currently supported applications:
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 26, 2023
-Last Modified : Jul 18, 2023
+Last Modified : Jul 24, 2023
 ===============================================================================
 """
 from io_opt import read_cfn_file, write_sfs_to_file
@@ -157,19 +157,21 @@ def forward_eval_cf(
 
 
 def forward_linear_eval_cf(
-        c, aff_corr_fp, gc_dir, sf_fp, fm_run_fp, time_wait,
+        c, L_inv,
+        aff_corr_fp, gc_dir, sf_fp, fm_run_fp, time_wait,
         max_et=28800  # default 8 hr
 ):
     """
-    Returns only the linear component of the affine forward model, i.e.,
-        Kc = f(c) - b.
+    Returns only the normalized linear component of the affine forward model:
+       L^{-1} Kc = L^{-1}(f(c) - b).
 
     NOTE: expects b to be contained in npy file.
 
     Parameters
     ----------
         c           (np arr) : input scaling factor vector
-        aff_corr_fp (str)    :
+        L_inv       (np arr) : file path to inverse cholesky decomp
+        aff_corr_fp (str)    : file path to affine correction (npy)
         gc_dir      (str)    : directory where GEOS-Chem is run and where
                                gctm.sf.01 is found
         sf_fp       (str)    : file path to where scaling factor is saved
@@ -196,11 +198,12 @@ def forward_linear_eval_cf(
     with open(aff_corr_fp, 'rb') as f:
         b = np.load(f)
 
-    return f_c - b
+    return np.multiply(L_inv, f_c - b)
 
 
 def adjoint_eval_cf(
-        w, w_save_fp, gosat_dir, w_dir, h_tabl_fp,
+        w, L_inv,
+        w_save_fp, gosat_dir, w_dir, h_tabl_fp,
         cost_func_fp, gdt_fp, adj_run_fp, mnth_idx_bnd, year,
         time_wait, max_eval_time=28800  # default 8 hrs
 ):
@@ -208,6 +211,8 @@ def adjoint_eval_cf(
     Adjoint model evaluation for carbon flux inversion.
 
     Input is a vector w, and output is the GDT file from GEOS-Chem Adjoint.
+
+    To normalize, w |-> L^{-1} w
 
     Inputs  -- w vector
     Outputs --
@@ -218,6 +223,7 @@ def adjoint_eval_cf(
     Parameters
     ----------
         w             (np arr) : opt variable in first ADMM subopt
+        L_inv         (np arr) : file path to inverse cholesky decomp
         w_save_fp     (str)    : where to save w vector as npy file
         gosat_dir     (str)    : directory containing template GOSAT files
         w_dir         (str)    : directory where w is saved as faux gosat files
@@ -238,10 +244,10 @@ def adjoint_eval_cf(
         adj_cost     (float)  : cost function evaluation
 
     """
-    # TODO - test out if we need a multiplier on w
     # create file containing w vector
+    w_norm = np.multiply(L_inv, w)
     with open(w_save_fp, 'wb') as f:
-        np.save(file=f, arr=w)
+        np.save(file=f, arr=w_norm)
 
     # generate gosat files containing new w vector
     files_created = create_gosat_files(
