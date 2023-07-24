@@ -90,6 +90,7 @@ if __name__ == "__main__":
     # create the observation covariance cholesky decomp vector -- L^{-1}
     gosat_df = pd.read_csv(GOSAT_DF_FP)
     L_inv_vec = 1 / gosat_df.xco2_unc.values
+    print('Generated inverse Cholesky factor...')
 
     # create wrappers around fuctions involving K matrix
     forward_eval = partial(
@@ -129,6 +130,9 @@ if __name__ == "__main__":
         y_obs = np.load(f)
     print('Affine Corrected observation obtained.')
 
+    # transform y_obs -> L^{-1} y_obs
+    y_tilde = np.multiply(L_inv_vec, y_obs)
+
     # obtain A and b constraint objects
     CONSTR_DIR = HOME + '/strict_bounds/lbfgsb_optimizer/data/sign_corrected'
     A, b = A_b_generation(
@@ -163,7 +167,7 @@ if __name__ == "__main__":
     # run optimization
     print('Running ADMM...')
     res_dict = run_admm(
-        y=y_obs,
+        y=y_tilde,
         A=A,
         b=b,
         h=h,
