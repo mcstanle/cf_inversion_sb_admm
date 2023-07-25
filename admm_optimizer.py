@@ -24,6 +24,7 @@ Created       : May 24, 2023
 Last Modified : Jul 25, 2023
 ===============================================================================
 """
+from functools import partial
 import numpy as np
 import os
 import pickle
@@ -218,7 +219,7 @@ def callback_save_iters(xk, save_loc):
 def run_admm(
     y, A, b, h, w_start, c_start, lambda_start, mu, psi_alpha,
     forward_eval, adjoint_eval, get_KTwk1,
-    lep, max_iters, maxls, w_callback, subopt_iters,
+    lep, max_iters, maxls, callback_dir, subopt_iters,
     adjoint_ht_fp, int_dict_dir
 ):
     """
@@ -247,14 +248,18 @@ def run_admm(
         lep           (bool)   : True if solving for the lower endpoint
         max_iters     (int)    : max number of outer loop ADMM iterations
         maxls         (int)    : max number of line search steps
-        w_callback    (func)   : callback function to save output w
+        callback_dir  (str)    : directory for callback func output from w opt
         subopt_iters  (int)    : max number of iterations for w optimization
         adjoint_ht_fp (str)    : filepath to hashtable for storing adjoint vals
         int_dict_dir  (str)    : directory where save intermediate data dict
 
     Returns
     -------
-        dictionary of all the optimization and sub optimization output
+        at the end:
+            1. dictionary of all the optimization and sub optimization output
+        intermediate:
+            1. callback output from w optimization
+            2. optimized objects for each k in ADMM iterations
     """
     # determine the endpoint we're evaluating
     lep_switch = -1 if lep else 1
@@ -292,6 +297,12 @@ def run_admm(
         with open(adjoint_ht_fp, 'wb') as f:
             pickle.dump({0: None}, f)
 
+        # define new callback function for this iteration
+        callback_w = partial(
+            callback_save_iters,
+            save_loc=callback_dir + f'/callback_w_opt_{str(k).zfill(2)}.txt'
+        )
+
         # w - update
         print(f'- w opt : iteration {k} -')
         w_opt_res = minimize(
@@ -309,10 +320,10 @@ def run_admm(
                 'maxls': maxls,
                 'iprint': 99
             },
-            callback=w_callback
+            callback=callback_w
         )
         # NOTE: remove later
-        SAVE_PATH = f'/glade/work/mcstanley/admm_objects/res_text{k}.pkl'
+        SAVE_PATH = int_dict_dir + f'/res_text{k}.pkl'
         with open(SAVE_PATH, 'wb') as f:
             pickle.dump(obj=w_opt_res, file=f)
 

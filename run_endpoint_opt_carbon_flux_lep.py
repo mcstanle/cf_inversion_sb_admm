@@ -4,10 +4,10 @@ is called for LEP optimization.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Jul 24, 2023
+Last Modified : Jul 25, 2023
 ===============================================================================
 """
-from admm_optimizer import callback_save_iters, run_admm
+from admm_optimizer import run_admm
 from forward_adjoint_evaluators import forward_linear_eval_cf, adjoint_eval_cf
 from functools import partial
 from generate_opt_objects import (
@@ -74,9 +74,6 @@ if __name__ == "__main__":
     COST_FUNC_FP = HOME_RUN + SUB_DIR_FILL + '/OptData/cfn.01'
     GDT_FP = HOME_RUN + SUB_DIR_FILL + '/OptData/gctm.gdt.01'
     CALLBACK_LOC = WORK + '/admm_objects/callback_w_opt.txt'
-
-    # wrapper for callback function
-    callback_f = partial(callback_save_iters, save_loc=CALLBACK_LOC)
 
     # check if necessary directories exist
     check_directories(
@@ -182,7 +179,7 @@ if __name__ == "__main__":
         lep=LEP_OPT,
         max_iters=MAX_ITERS,
         maxls=MAXLS,
-        w_callback=callback_f,
+        callback_dir=SAVE_DIR,
         subopt_iters=SUBOPT_ITERS,
         adjoint_ht_fp=ADJOINT_EVAL_HT_FP,
         int_dict_dir=SAVE_DIR
