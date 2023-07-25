@@ -21,7 +21,7 @@ TODO:
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 24, 2023
-Last Modified : Jul 19, 2023
+Last Modified : Jul 25, 2023
 ===============================================================================
 """
 import numpy as np
@@ -219,7 +219,7 @@ def run_admm(
     y, A, b, h, w_start, c_start, lambda_start, mu, psi_alpha,
     forward_eval, adjoint_eval, get_KTwk1,
     lep, max_iters, maxls, w_callback, subopt_iters,
-    adjoint_ht_fp
+    adjoint_ht_fp, int_dict_dir
 ):
     """
     ADMM interval endpoint optimizer.
@@ -250,6 +250,7 @@ def run_admm(
         w_callback    (func)   : callback function to save output w
         subopt_iters  (int)    : max number of iterations for w optimization
         adjoint_ht_fp (str)    : filepath to hashtable for storing adjoint vals
+        int_dict_dir  (str)    : directory where save intermediate data dict
 
     Returns
     -------
@@ -325,7 +326,7 @@ def run_admm(
         KTw_vecs[k, :] = KTwk1
 
         # delete the hash table
-        # os.remove(adjoint_ht_fp)
+        os.remove(adjoint_ht_fp)
 
         # c - update
         print(f'- c opt : iteration {k} -')
@@ -363,6 +364,18 @@ def run_admm(
         w_opt_vecs[k, :] = w_k
         c_opt_vecs[k, :] = c_k
         lambda_opt_vecs[k, :] = lambda_k
+
+        # output intermediate dictionary with key data
+        DICT_FP = int_dict_dir + f'/opt_output_{str(k).zfill(2)}.pkl'
+        int_dict = {
+            'objective_evals': f_admm_evals,
+            'w_opt_vecs': w_opt_vecs,
+            'c_opt_vecs': c_opt_vecs,
+            'lambda_opt_vecs': lambda_opt_vecs,
+            'KTw_vecs': KTw_vecs
+        }
+        with open(DICT_FP, 'wb') as f:
+            pickle.dump(int_dict, f)
 
     # NOTE - ADMM OUTPUT
     return {

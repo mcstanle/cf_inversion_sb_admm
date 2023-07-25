@@ -43,9 +43,9 @@ if __name__ == "__main__":
 
     # operational parameters
     LEP_OPT = True
-    MAX_ITERS = 1
-    SUBOPT_ITERS = 2
-    MAXLS = 3         # max number of line search steps in w opt
+    MAX_ITERS = 10
+    SUBOPT_ITERS = 12
+    MAXLS = 10        # max number of line search steps in w opt
     TIME_2_WAIT = 15  # seconds between each check for file existence
     YEAR = 2010
     MONTH_IDX = 9
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     W_DIR = WORK + '/admm_objects/w_gen_dir_lep'
 
     # end result save location
-    SAVE_DIR = WORK + '/admm_objects/results/test'
+    SAVE_DIR = WORK + '/admm_objects/results/00'
 
     # define necessary file paths
     AFFINE_CORR_FP = WORK_P_FIX + '/affine_correction.npy'
@@ -184,9 +184,10 @@ if __name__ == "__main__":
         maxls=MAXLS,
         w_callback=callback_f,
         subopt_iters=SUBOPT_ITERS,
-        adjoint_ht_fp=ADJOINT_EVAL_HT_FP
+        adjoint_ht_fp=ADJOINT_EVAL_HT_FP,
+        int_dict_dir=SAVE_DIR
     )
 
     # save the above output
-    with open(SAVE_DIR + '/test_run.pkl', 'wb') as f:
+    with open(SAVE_DIR + '/final_results.pkl', 'wb') as f:
         pickle.dump(res_dict, f)
