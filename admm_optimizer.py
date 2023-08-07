@@ -218,7 +218,7 @@ def callback_save_iters(xk, save_loc):
 
 def run_admm(
     y, A, b, h, w_start, c_start, lambda_start, mu, psi_alpha,
-    forward_eval, adjoint_eval, get_KTwk1,
+    forward_eval, adjoint_eval, get_KTwk1, start_idx,
     lep, max_iters, maxls, callback_dir, subopt_iters,
     adjoint_ht_fp, int_dict_dir
 ):
@@ -244,6 +244,7 @@ def run_admm(
         forward_eval  (func)   : returns Kx (e.g., GEOS-Chem at x)
         adjoint_eval  (func)   : returns K^T w
         get_KTwk1     (func)   : returns the previous K^Tw_{k+1} for c opt
+        start_idx     (int)    : interation index from which to start algorithm
         mu            (float)  : penalty parameter
         lep           (bool)   : True if solving for the lower endpoint
         max_iters     (int)    : max number of outer loop ADMM iterations
@@ -289,7 +290,7 @@ def run_admm(
     c_k = c_start.copy()
     lambda_k = lambda_start.copy()
 
-    for k in range(max_iters):
+    for k in range(start_idx, max_iters):
 
         print(f'--- Iteration {k} ---')
 

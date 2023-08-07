@@ -11,7 +11,7 @@ endpoint optimizations.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 16, 2023
-Last Modified : Jun 19, 2023
+Last Modified : Aug 07, 2023
 ===============================================================================
 """
 from carbonfluxtools.io_utils import create_gosat_df_year
@@ -145,6 +145,36 @@ def starting_point_generation(m, d, p, random_seed):
     lambda_sp = np.zeros(p)
 
     return w_sp, c_sp, lambda_sp
+
+
+def read_starting_point(w_fp, c_fp, lambda_fp):
+    """
+    In the event that an optimization needs to be started from a particular
+    point (e.g., in the case of a restart from abnormal termination), this
+    function reads in the desired w, c, and lambda vectors.
+
+    NOTE: all file formats are expected to be .npy
+
+    Parameters
+    ----------
+        w_fp      (str) : location of w vector
+        c_fp      (str) : location of c vector
+        lambda_fp (str) : location of lambda vector
+    """
+    assert w_fp.split('.')[-1] == 'npy'
+    assert c_fp.split('.')[-1] == 'npy'
+    assert lambda_fp.split('.')[-1] == 'npy'
+
+    with open(w_fp, 'rb') as f:
+        w_vec = np.load(f)
+
+    with open(c_fp, 'rb') as f:
+        c_vec = np.load(f)
+
+    with open(lambda_fp, 'rb') as f:
+        lambda_vec = np.load(f)
+
+    return w_vec, c_vec, lambda_vec
 
 
 if __name__ == '__main__':

@@ -4,7 +4,7 @@ is called for LEP optimization.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Jul 25, 2023
+Last Modified : Aug 07, 2023
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -12,7 +12,8 @@ from forward_adjoint_evaluators import forward_linear_eval_cf, adjoint_eval_cf
 from functools import partial
 from generate_opt_objects import (
     A_b_generation,
-    starting_point_generation
+    starting_point_generation,
+    read_starting_point
 )
 from io_opt import get_KTwk1
 import numpy as np
@@ -50,6 +51,8 @@ if __name__ == "__main__":
     YEAR = 2010
     MONTH_IDX = 9
     MU = 1e3  # penalty parameter enforcing feasibility
+    READ_START_VECTORS = True  # read in previously saved w, c, and lambda vecs
+    START_IDX = 2  # should be 0 unless reading specific start vectors
 
     # define necessary directories
     HOME = '/glade/u/home/mcstanley'
@@ -60,6 +63,7 @@ if __name__ == "__main__":
     SAT_OBS = WORK + '/Data/OSSE_OBS'
     GC_DIR = HOME + '/gc_adj_runs/forward_model_osb_lep'
     W_DIR = WORK + '/admm_objects/w_gen_dir_lep'
+    INT_START_DIR = WORK + '/admm_objects/results/00/intermediate_starts'
 
     # end result save location
     SAVE_DIR = WORK + '/admm_objects/results/00'
@@ -149,10 +153,17 @@ if __name__ == "__main__":
     d = b.shape[0]
     p = A.shape[1]
 
-    w_sp, c_sp, lambda_sp = starting_point_generation(
-        m=m, d=d, p=p,
-        random_seed=12345
-    )
+    if READ_START_VECTORS:
+        w_sp, c_sp, lambda_sp = read_starting_point(
+            w_fp=INT_START_DIR + '/cheyenne_stop_w_vec.npy',
+            c_fp=INT_START_DIR + '/cheyenne_stop_c_vec.npy',
+            lambda_fp=INT_START_DIR + '/cheyenne_stop_lambda_vec.npy'
+        )
+    else:
+        w_sp, c_sp, lambda_sp = starting_point_generation(
+            m=m, d=d, p=p,
+            random_seed=12345
+        )
 
     # read in the optimized slack factor
     SLACK_F_FP = WORK + '/admm_objects/slack_opt/opt_res_cont.pkl'
@@ -176,6 +187,7 @@ if __name__ == "__main__":
         forward_eval=forward_eval,
         adjoint_eval=adjoint_eval,
         get_KTwk1=get_KTwk1_par,
+        start_idx=START_IDX,
         lep=LEP_OPT,
         max_iters=MAX_ITERS,
         maxls=MAXLS,
@@ -186,5 +198,5 @@ if __name__ == "__main__":
     )
 
     # save the above output
-    with open(SAVE_DIR + '/final_results.pkl', 'wb') as f:
+    with open(SAVE_DIR + '/final_results_restart.pkl', 'wb') as f:
         pickle.dump(res_dict, f)
