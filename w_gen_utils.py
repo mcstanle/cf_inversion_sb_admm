@@ -287,7 +287,7 @@ def create_gosat_files(
 
     return all_files_exist
 
-@profile
+
 def create_gosat_files_lite(
     xco2_fp,
     origin_dir, save_dir,
