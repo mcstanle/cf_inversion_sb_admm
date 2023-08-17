@@ -11,7 +11,7 @@ Currently supported applications:
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 26, 2023
-Last Modified : Jul 24, 2023
+Last Modified : Aug 17, 2023
 ===============================================================================
 """
 from io_opt import read_cfn_file, write_sfs_to_file
@@ -21,7 +21,7 @@ import pickle
 import PseudoNetCDF as pnc
 import subprocess
 import time
-from w_gen_utils import create_gosat_files
+from w_gen_utils import create_gosat_files_lite
 
 
 def forward_eval_unfold(x, K, L_inv):
@@ -250,7 +250,7 @@ def adjoint_eval_cf(
         np.save(file=f, arr=w_norm)
 
     # generate gosat files containing new w vector
-    files_created = create_gosat_files(
+    files_created = create_gosat_files_lite(
         xco2_fp=w_save_fp,
         origin_dir=gosat_dir,
         save_dir=w_dir,
