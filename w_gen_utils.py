@@ -8,6 +8,7 @@ Last Modified : Aug 17, 2023
 """
 from carbonfluxtools.io_utils import create_gosat_df_year, get_ij
 from datetime import datetime
+from glob import glob
 import numpy as np
 import os
 import pandas as pd
@@ -286,6 +287,97 @@ def create_gosat_files(
 
     return all_files_exist
 
+@profile
+def create_gosat_files_lite(
+    xco2_fp,
+    origin_dir, save_dir,
+    year, month,
+    disable_tqdm=True
+):
+    """
+    Lighter version of create_gosat_files() above. Does not use pandas.
+
+    With the input xco2 values stored in npy file (xco2_fp), create
+    a GOSAT file with the desired "xco2" values. The idea here is that one can
+    substitute in an arbitrary vector depending on what kind of xco2
+    values one wants to make.
+
+    NOTE: this function simply copies the directory structure of the given on
+          specified by origin_dir.
+
+    NOTE: this implementation was developed and verified in Research/
+          Carbon_Flux/optimization/
+          new_gosat_file_creation_dev_and_test.ipynb
+
+    Parameters
+    ----------
+        xco2_fp         (str)  : func to create new xco2 values in gosat files
+        origin_dir      (str)  : template GOSAT observation files to be changed
+        save_dir        (str)  : location of directory to be constructed
+        year            (int)  : GOSAT obs year of interest
+        month           (int)  : least upper bound (not inclusive) month
+        disable_tqdm    (bool) : toggle progress bar for file generation
+
+    Returns
+    -------
+        bool if directory and all files made successfully.
+    """
+    assert os.path.isdir(origin_dir)
+    assert os.path.isdir(save_dir)
+
+    # obtain list of sorted file names up until the end of month of interest
+    fps_year = [i for i in glob(origin_dir + '/*') if int(i[-12:-8]) == year]
+    dates = [i.split('/')[-1].split('.')[0][-8:] for i in fps_year]
+    fps_sorted = [
+        file_i for file_i, date_i in sorted(
+            zip(fps_year, dates), key=lambda x: x[1]
+        )
+    ]
+    end_date_idx = [
+        idx for idx, date in enumerate(sorted(dates))
+        if date[4:6] == str(month).zfill(2)
+    ][0]
+
+    fps = fps_sorted[:end_date_idx]
+
+    # read in the new values to plug into new GOSAT files
+    with open(xco2_fp, 'rb') as f:
+        new_vals = np.load(f)
+
+    # make new files
+    start_idx = 0
+    end_idx = 0
+    all_files_exist = True
+    for fp_i in tqdm(fps, disable=disable_tqdm):
+
+        # import current data
+        gos_orig_i = read_gosat_data(fp=fp_i)
+
+        # determine the number of observations
+        end_idx += len(gos_orig_i) // 7
+
+        # create new gosat data
+        gos_new = create_gosat_day(
+            obs_list=gos_orig_i,
+            modeled_obs=new_vals[start_idx:end_idx]
+        )
+
+        # write out
+        output_fp = save_dir + '/' + fp_i.split('/')[-1]
+        write_gosat_day(
+            obs_list=gos_new,
+            write_path=output_fp
+        )
+
+        # check that the new file exists
+        if not os.path.exists(output_fp):
+            all_files_exist = False
+
+        # reset indices
+        start_idx = end_idx
+
+    return all_files_exist
+
 
 if __name__ == "__main__":
 
@@ -305,7 +397,17 @@ if __name__ == "__main__":
         np.save(file=f, arr=np.ones(28267))
 
     # create files
-    files_created = create_gosat_files(
+    # files_created = create_gosat_files(
+    #     xco2_fp=XCO2_FP,
+    #     origin_dir=ORIGIN_DIR,
+    #     save_dir=SAVE_DIR,
+    #     year=YEAR,
+    #     month=MONTH,
+    #     disable_tqdm=False
+    # )
+
+    # create files using the "lite" framework
+    files_created = create_gosat_files_lite(
         xco2_fp=XCO2_FP,
         origin_dir=ORIGIN_DIR,
         save_dir=SAVE_DIR,
