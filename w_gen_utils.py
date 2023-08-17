@@ -3,7 +3,7 @@ Utility functions to support the generation of w vector.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 14, 2023
-Last Modified : Jun 14, 2023
+Last Modified : Aug 17, 2023
 ===============================================================================
 """
 from carbonfluxtools.io_utils import create_gosat_df_year, get_ij
@@ -145,6 +145,7 @@ def write_gosat_day(obs_list, write_path):
     return write_path
 
 
+@profile
 def create_gosat_files(
     xco2_fp,
     origin_dir, save_dir,
