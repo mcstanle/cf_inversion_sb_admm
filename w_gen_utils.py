@@ -145,7 +145,7 @@ def write_gosat_day(obs_list, write_path):
     return write_path
 
 
-@profile
+# @profile
 def create_gosat_files(
     xco2_fp,
     origin_dir, save_dir,
