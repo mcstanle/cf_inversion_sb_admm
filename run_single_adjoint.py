@@ -31,6 +31,7 @@ if __name__ == "__main__":
     COST_FUNC_FP = HOME_RUN + SUB_DIR_FILL + '/OptData/cfn.01'
     GDT_FP = HOME_RUN + SUB_DIR_FILL + '/OptData/gctm.gdt.01'
     ADJ_RUN_FP = HOME + '/pbs_run_scripts/run_adjoint_model_osb_admm_lep'
+    TIME_2_WAIT = 15
     YEAR = 2010
     MONTH_IDX = 9
 
@@ -61,7 +62,8 @@ if __name__ == "__main__":
         gdt_fp=GDT_FP,
         adj_run_fp=ADJ_RUN_FP,
         mnth_idx_bnd=MONTH_IDX,
-        year=YEAR
+        year=YEAR,
+        time_wait=TIME_2_WAIT
     )
 
     # write out results
