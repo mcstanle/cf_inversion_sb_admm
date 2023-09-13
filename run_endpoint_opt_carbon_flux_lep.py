@@ -66,7 +66,7 @@ if __name__ == "__main__":
     INT_START_DIR = WORK + '/admm_objects/results/01/intermediate_starts'
 
     # end result save location
-    SAVE_DIR = WORK + '/admm_objects/results/00'
+    SAVE_DIR = WORK + '/admm_objects/results/01'
 
     # define necessary file paths
     AFFINE_CORR_FP = WORK_P_FIX + '/affine_correction.npy'
