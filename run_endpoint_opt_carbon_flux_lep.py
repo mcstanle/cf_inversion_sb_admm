@@ -4,7 +4,7 @@ is called for LEP optimization.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Aug 07, 2023
+Last Modified : Sep 12, 2023
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     MONTH_IDX = 9
     MU = 1e3  # penalty parameter enforcing feasibility
     READ_START_VECTORS = True  # read in previously saved w, c, and lambda vecs
-    START_IDX = 2  # should be 0 unless reading specific start vectors
+    START_IDX = 0  # should be 0 unless reading specific start vectors
 
     # define necessary directories
     HOME = '/glade/u/home/mcstanley'
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     SAT_OBS = WORK + '/Data/OSSE_OBS'
     GC_DIR = HOME + '/gc_adj_runs/forward_model_osb_lep'
     W_DIR = WORK + '/admm_objects/w_gen_dir_lep'
-    INT_START_DIR = WORK + '/admm_objects/results/00/intermediate_starts'
+    INT_START_DIR = WORK + '/admm_objects/results/01/intermediate_starts'
 
     # end result save location
     SAVE_DIR = WORK + '/admm_objects/results/00'
@@ -198,5 +198,5 @@ if __name__ == "__main__":
     )
 
     # save the above output
-    with open(SAVE_DIR + '/final_results_restart.pkl', 'wb') as f:
+    with open(SAVE_DIR + '/final_results.pkl', 'wb') as f:
         pickle.dump(res_dict, f)

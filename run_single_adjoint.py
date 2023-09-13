@@ -67,6 +67,6 @@ if __name__ == "__main__":
     )
 
     # write out results
-    OUTPUT_FP = WORK + '/admm_objects/misc/KTw_for_w_start.npy'
-    with open(OUTPUT_FP, 'rb') as f:
+    OUTPUT_FP = WORK + '/admm_objects/results/misc/KTw_for_w_start.npy'
+    with open(OUTPUT_FP, 'wb') as f:
         np.save(file=f, arr=adj_val_flat)
