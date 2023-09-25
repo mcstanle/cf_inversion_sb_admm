@@ -4,7 +4,7 @@ is called for LEP optimization.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Sep 16, 2023
+Last Modified : Sep 25, 2023
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -48,11 +48,12 @@ if __name__ == "__main__":
     SUBOPT_ITERS = 12
     MAXLS = 10        # max number of line search steps in w opt
     TIME_2_WAIT = 15  # seconds between each check for file existence
+    MAX_EVAL_TIME = 60 * 60 * 24  # number of seconds to wait for for/adj eval
     YEAR = 2010
     MONTH_IDX = 9
     MU = 1e3  # penalty parameter enforcing feasibility
     READ_START_VECTORS = True  # read in previously saved w, c, and lambda vecs
-    START_IDX = 0  # should be 0 unless reading specific start vectors
+    START_IDX = 2  # should be 0 unless reading specific start vectors
 
     # define necessary directories
     HOME = '/glade/u/home/mcstanley'
@@ -102,7 +103,7 @@ if __name__ == "__main__":
         sf_fp=SF_F_FP,
         fm_run_fp=FM_RUN_FP,
         time_wait=TIME_2_WAIT,
-        max_et=28800
+        max_et=MAX_EVAL_TIME
     )
     adjoint_eval = partial(
         adjoint_eval_cf,
@@ -117,7 +118,7 @@ if __name__ == "__main__":
         mnth_idx_bnd=MONTH_IDX,
         year=YEAR,
         time_wait=TIME_2_WAIT,
-        max_eval_time=28800
+        max_eval_time=MAX_EVAL_TIME
     )
     get_KTwk1_par = partial(
         get_KTwk1, adjoint_ht_fp=ADJOINT_EVAL_HT_FP
@@ -155,9 +156,9 @@ if __name__ == "__main__":
 
     if READ_START_VECTORS:
         w_sp, c_sp, lambda_sp = read_starting_point(
-            w_fp=INT_START_DIR + '/cheyenne_stop_w_vec.npy',
-            c_fp=INT_START_DIR + '/cheyenne_stop_c_vec.npy',
-            lambda_fp=INT_START_DIR + '/cheyenne_stop_lambda_vec.npy'
+            w_fp=INT_START_DIR + '/w_start_it2.npy',
+            c_fp=INT_START_DIR + '/c_start_it2.npy',
+            lambda_fp=INT_START_DIR + '/lambda_start_it2.npy'
         )
     else:
         w_sp, c_sp, lambda_sp = starting_point_generation(
