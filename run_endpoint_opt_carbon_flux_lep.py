@@ -4,7 +4,7 @@ is called for LEP optimization.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Sep 25, 2023
+Last Modified : Oct 05, 2023
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     MONTH_IDX = 9
     MU = 1e3  # penalty parameter enforcing feasibility
     READ_START_VECTORS = True  # read in previously saved w, c, and lambda vecs
-    START_IDX = 2  # should be 0 unless reading specific start vectors
+    START_IDX = 5  # should be 0 unless reading specific start vectors
 
     # define necessary directories
     HOME = '/glade/u/home/mcstanley'
@@ -156,9 +156,9 @@ if __name__ == "__main__":
 
     if READ_START_VECTORS:
         w_sp, c_sp, lambda_sp = read_starting_point(
-            w_fp=INT_START_DIR + '/w_start_it2.npy',
-            c_fp=INT_START_DIR + '/c_start_it2.npy',
-            lambda_fp=INT_START_DIR + '/lambda_start_it2.npy'
+            w_fp=INT_START_DIR + '/w_start_it5.npy',
+            c_fp=INT_START_DIR + '/c_start_it5.npy',
+            lambda_fp=INT_START_DIR + '/lambda_start_it5.npy'
         )
     else:
         w_sp, c_sp, lambda_sp = starting_point_generation(
