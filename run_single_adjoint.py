@@ -6,11 +6,11 @@ This script can be used for:
 ===============================================================================
 Author        : Mike Stanley
 Created       : Sep 12, 2023
-Last Modified : Sep 12, 2023
+Last Modified : Oct 31, 2023
 ===============================================================================
 """
 from forward_adjoint_evaluators import adjoint_eval_cf
-from generate_opt_objects import starting_point_generation
+# from generate_opt_objects import starting_point_generation
 import numpy as np
 import pandas as pd
 import pickle
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     SUB_DIR_FILL = '/runs/v8-02-01/geos5'
     WORK_P_FIX = WORK + '/admm_objects/fixed_optimization_inputs'
     GOSAT_DF_FP = WORK_P_FIX + '/gosat_df_jan1_aug31_2010.csv'
-    W_SAVE_FP = WORK + '/admm_objects/w_vecs/w_vec_lep.npy'
+    W_SAVE_FP = WORK + '/admm_objects/w_vecs/w_vec_max_adjoint.npy'
     SAT_OBS = WORK + '/Data/OSSE_OBS'
     W_DIR = WORK + '/admm_objects/w_gen_dir_lep'
     ADJOINT_EVAL_HT_FP = WORK + '/admm_objects/h_table_lep_TMP.pkl'
@@ -41,10 +41,14 @@ if __name__ == "__main__":
 
     # generate the starting w value
     m, d, p = 28267, 11120, 26496
-    w_sp, c_sp, lambda_sp = starting_point_generation(
-        m=m, d=d, p=p,
-        random_seed=12345
-    )
+    # w_sp, c_sp, lambda_sp = starting_point_generation(
+    #     m=m, d=d, p=p,
+    #     random_seed=12345
+    # )
+
+    # read in a w vector
+    with open(WORK + '/admm_objects/w_vecs/w_vec_max.npy', 'rb') as f:
+        w_sp = np.load(f)
 
     # create dummy hash table so there are no issues
     with open(ADJOINT_EVAL_HT_FP, 'wb') as f:
@@ -67,6 +71,6 @@ if __name__ == "__main__":
     )
 
     # write out results
-    OUTPUT_FP = WORK + '/admm_objects/results/misc/KTw_for_w_start.npy'
+    OUTPUT_FP = WORK + '/admm_objects/results/misc/KTw_for_w_max.npy'
     with open(OUTPUT_FP, 'wb') as f:
         np.save(file=f, arr=adj_val_flat)
