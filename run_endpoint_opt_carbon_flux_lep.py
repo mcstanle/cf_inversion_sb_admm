@@ -4,7 +4,7 @@ is called for LEP optimization.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Nov 13, 2023
+Last Modified : Nov 17, 2023
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -64,10 +64,10 @@ if __name__ == "__main__":
     SAT_OBS = WORK + '/Data/OSSE_OBS'
     GC_DIR = HOME + '/gc_adj_runs/forward_model_osb_lep'
     W_DIR = WORK + '/admm_objects/w_gen_dir_lep'
-    INT_START_DIR = WORK + '/admm_objects/results/05/intermediate_starts'
+    INT_START_DIR = WORK + '/admm_objects/results/06/intermediate_starts'
 
     # end result save location
-    SAVE_DIR = WORK + '/admm_objects/results/05'
+    SAVE_DIR = WORK + '/admm_objects/results/06'
 
     # define necessary file paths
     AFFINE_CORR_FP = WORK_P_FIX + '/affine_correction.npy'
