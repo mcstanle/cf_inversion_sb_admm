@@ -4,7 +4,7 @@ is called for LEP optimization.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Nov 17, 2023
+Last Modified : Nov 24, 2023
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     # operational parameters
     LEP_OPT = True
-    MAX_ITERS = 2
+    MAX_ITERS = 10
     SUBOPT_ITERS = 12
     MAXLS = 10        # max number of line search steps in w opt
     TIME_2_WAIT = 15  # seconds between each check for file existence
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     MONTH_IDX = 9
     MU = 1e3  # penalty parameter enforcing feasibility
     READ_START_VECTORS = True  # read in previously saved w, c, and lambda vecs
-    START_IDX = 0  # should be 0 unless reading specific start vectors
+    START_IDX = 2  # should be 0 unless reading specific start vectors
 
     # define necessary directories
     HOME = '/glade/u/home/mcstanley'
@@ -156,9 +156,9 @@ if __name__ == "__main__":
 
     if READ_START_VECTORS:
         w_sp, c_sp, lambda_sp = read_starting_point(
-            w_fp=INT_START_DIR + '/w_start_it0.npy',
-            c_fp=INT_START_DIR + '/c_start_it0.npy',
-            lambda_fp=INT_START_DIR + '/lambda_start_it0.npy'
+            w_fp=INT_START_DIR + '/w_start_it2.npy',
+            c_fp=INT_START_DIR + '/c_start_it2.npy',
+            lambda_fp=INT_START_DIR + '/lambda_start_it2.npy'
         )
     else:
         w_sp, c_sp, lambda_sp = starting_point_generation(
