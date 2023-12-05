@@ -313,10 +313,6 @@ def run_admm(
             save_loc=callback_dir + f'/callback_w_opt_{str(k).zfill(2)}.txt'
         )
 
-        # if mask path is given apply that to w_k
-        if mask_path:
-            w_k[mask_arr] = 0.
-
         # w - update
         print(f'- w opt : iteration {k} -')
         w_opt_res = minimize(
@@ -377,6 +373,10 @@ def run_admm(
 
         # dual variable update
         lambda_k += mu * (h - lep_switch * A.T @ c_k - KTwk1)
+
+        # if mask path is given apply that to w_k
+        if mask_path:
+            w_k[mask_arr] = 0.
 
         # save the objective function value
         f_admm_evals.append(
