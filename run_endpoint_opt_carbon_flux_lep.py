@@ -1,10 +1,14 @@
 """
 Script to kick off optimization jobs for the carbon flux problem. This script
 is called for LEP optimization.
+
+NOTE: (Dec 4) adding functionality to include a mask at the start of each ADMM
+iteration. This can be used to enforce particular settings for weights. This is
+encoded in the variable MASK_PATH. If None, no mask is applied.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Nov 24, 2023
+Last Modified : Dec 04, 2023
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -53,7 +57,7 @@ if __name__ == "__main__":
     MONTH_IDX = 9
     MU = 1e3  # penalty parameter enforcing feasibility
     READ_START_VECTORS = True  # read in previously saved w, c, and lambda vecs
-    START_IDX = 2  # should be 0 unless reading specific start vectors
+    START_IDX = 0  # should be 0 unless reading specific start vectors
 
     # define necessary directories
     HOME = '/glade/u/home/mcstanley'
@@ -64,10 +68,10 @@ if __name__ == "__main__":
     SAT_OBS = WORK + '/Data/OSSE_OBS'
     GC_DIR = HOME + '/gc_adj_runs/forward_model_osb_lep'
     W_DIR = WORK + '/admm_objects/w_gen_dir_lep'
-    INT_START_DIR = WORK + '/admm_objects/results/06/intermediate_starts'
+    INT_START_DIR = WORK + '/admm_objects/results/07/intermediate_starts'
 
     # end result save location
-    SAVE_DIR = WORK + '/admm_objects/results/06'
+    SAVE_DIR = WORK + '/admm_objects/results/07'
 
     # define necessary file paths
     AFFINE_CORR_FP = WORK_P_FIX + '/affine_correction.npy'
@@ -79,6 +83,7 @@ if __name__ == "__main__":
     COST_FUNC_FP = HOME_RUN + SUB_DIR_FILL + '/OptData/cfn.01'
     GDT_FP = HOME_RUN + SUB_DIR_FILL + '/OptData/gctm.gdt.01'
     CALLBACK_LOC = WORK + '/admm_objects/callback_w_opt.txt'
+    MASK_PATH = INT_START_DIR + '/january_mask.npy'
 
     # check if necessary directories exist
     check_directories(
@@ -156,9 +161,9 @@ if __name__ == "__main__":
 
     if READ_START_VECTORS:
         w_sp, c_sp, lambda_sp = read_starting_point(
-            w_fp=INT_START_DIR + '/w_start_it2.npy',
-            c_fp=INT_START_DIR + '/c_start_it2.npy',
-            lambda_fp=INT_START_DIR + '/lambda_start_it2.npy'
+            w_fp=INT_START_DIR + '/w_start_it0.npy',
+            c_fp=INT_START_DIR + '/c_start_it0.npy',
+            lambda_fp=INT_START_DIR + '/lambda_start_it0.npy'
         )
     else:
         w_sp, c_sp, lambda_sp = starting_point_generation(
@@ -183,6 +188,7 @@ if __name__ == "__main__":
         w_start=w_sp,
         c_start=c_sp,
         lambda_start=lambda_sp,
+        mask_path=MASK_PATH,
         mu=MU,
         psi_alpha=np.sqrt(PSI2),
         forward_eval=forward_eval,

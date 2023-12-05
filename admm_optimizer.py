@@ -21,7 +21,7 @@ TODO:
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 24, 2023
-Last Modified : Jul 25, 2023
+Last Modified : Dec 04, 2023
 ===============================================================================
 """
 from functools import partial
@@ -217,7 +217,7 @@ def callback_save_iters(xk, save_loc):
 
 
 def run_admm(
-    y, A, b, h, w_start, c_start, lambda_start, mu, psi_alpha,
+    y, A, b, h, w_start, c_start, lambda_start, mask_path, mu, psi_alpha,
     forward_eval, adjoint_eval, get_KTwk1, start_idx,
     lep, max_iters, maxls, callback_dir, subopt_iters,
     adjoint_ht_fp, int_dict_dir
@@ -226,6 +226,9 @@ def run_admm(
     ADMM interval endpoint optimizer.
 
     NOTE: this function currently only supports constant mu.
+
+    NOTE: for the mask_path functionality, we currently only support setting
+    the mask values all to 0.
 
     Sub-optimization details
     1. w optimization is performed with L-BFGS
@@ -240,6 +243,7 @@ def run_admm(
         w_start       (np arr) : m x 1 -- starting position for w
         c_start       (np arr) : d x 1 -- starting position for c
         lambda_start  (np arr) : d x 1 -- starting position for lambda
+        mask_path     (str)    : path to npy file containing mask
         psi_alpha     (float)  : optimized slack factor
         forward_eval  (func)   : returns Kx (e.g., GEOS-Chem at x)
         adjoint_eval  (func)   : returns K^T w
@@ -279,6 +283,11 @@ def run_admm(
     c_opt_nfev = np.zeros(max_iters)
     c_opt_njev = np.zeros(max_iters)
 
+    # read in w mask
+    if mask_path:
+        with open(mask_path, 'rb') as f:
+            mask_arr = np.load(f)
+
     # arrays for saving the intermediate optimized vectors
     w_opt_vecs = np.zeros(shape=(max_iters, m))
     c_opt_vecs = np.zeros(shape=(max_iters, d))
@@ -303,6 +312,10 @@ def run_admm(
             callback_save_iters,
             save_loc=callback_dir + f'/callback_w_opt_{str(k).zfill(2)}.txt'
         )
+
+        # if mask path is given apply that to w_k
+        if mask_path:
+            w_k[mask_arr] = 0.
 
         # w - update
         print(f'- w opt : iteration {k} -')
