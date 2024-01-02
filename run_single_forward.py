@@ -9,7 +9,7 @@ of the affine correction.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Dec 04, 2023
-Last Modified : Dec 04, 2023
+Last Modified : Jan 02, 2024
 ===============================================================================
 """
 from forward_adjoint_evaluators import forward_linear_eval_cf
@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
     # read in a input vector
     with open(
-        WORK + '/admm_objects/lambda_vecs/lambda_06.npy',
+        WORK + '/admm_objects/lambda_vecs/lambda_07.npy',
         'rb'
     ) as f:
         x = np.load(f)
@@ -52,6 +52,6 @@ if __name__ == "__main__":
     )
 
     # write out results
-    OUTPUT_FP = WORK + '/admm_objects/results/misc/opt_check_K_lambda_06.npy'
+    OUTPUT_FP = WORK + '/admm_objects/results/misc/opt_check_K_lambda_07.npy'
     with open(OUTPUT_FP, 'wb') as f:
         np.save(file=f, arr=output_forward_vec)
