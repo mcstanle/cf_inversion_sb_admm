@@ -5,10 +5,15 @@ is called for LEP optimization.
 NOTE: (Dec 4) adding functionality to include a mask at the start of each ADMM
 iteration. This can be used to enforce particular settings for weights. This is
 encoded in the variable MASK_PATH. If None, no mask is applied.
+
+NOTE: (Jan 3) Mask is used to create a bound object for the scipy optimizer.
+This implementation means that the w-components of interest are held at 0
+during the w optimization, rather than set to zero at the end of each ADMM
+iteration.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Dec 04, 2023
+Last Modified : Jan 03, 2023
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -68,10 +73,10 @@ if __name__ == "__main__":
     SAT_OBS = WORK + '/Data/OSSE_OBS'
     GC_DIR = HOME + '/gc_adj_runs/forward_model_osb_lep'
     W_DIR = WORK + '/admm_objects/w_gen_dir_lep'
-    INT_START_DIR = WORK + '/admm_objects/results/07/intermediate_starts'
+    INT_START_DIR = WORK + '/admm_objects/results/08/intermediate_starts'
 
     # end result save location
-    SAVE_DIR = WORK + '/admm_objects/results/07'
+    SAVE_DIR = WORK + '/admm_objects/results/08'
 
     # define necessary file paths
     AFFINE_CORR_FP = WORK_P_FIX + '/affine_correction.npy'

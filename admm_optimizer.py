@@ -21,7 +21,7 @@ TODO:
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 24, 2023
-Last Modified : Dec 04, 2023
+Last Modified : Jan 03, 2023
 ===============================================================================
 """
 from functools import partial
@@ -231,7 +231,7 @@ def run_admm(
     the mask values all to 0.
 
     Sub-optimization details
-    1. w optimization is performed with L-BFGS
+    1. w optimization is performed with L-BFGS-B
     2. c optimization is performed with L-BFGS-B
 
     Parameters
@@ -288,6 +288,12 @@ def run_admm(
         with open(mask_path, 'rb') as f:
             mask_arr = np.load(f)
 
+        # create mask bounds object for w optimization
+        w_bounds = [(None, None)] * len(mask_arr)
+        for i, bool_i in enumerate(mask_arr):
+            if bool_i:
+                w_bounds[i] = (0., 0.)
+
     # arrays for saving the intermediate optimized vectors
     w_opt_vecs = np.zeros(shape=(max_iters, m))
     c_opt_vecs = np.zeros(shape=(max_iters, d))
@@ -325,6 +331,7 @@ def run_admm(
                 y, A, b, h
             ),
             method='L-BFGS-B',
+            bounds=w_bounds if mask_path else None,
             options={
                 'maxiter': subopt_iters,
                 'maxls': maxls,
@@ -373,10 +380,6 @@ def run_admm(
 
         # dual variable update
         lambda_k += mu * (h - lep_switch * A.T @ c_k - KTwk1)
-
-        # if mask path is given apply that to w_k
-        if mask_path:
-            w_k[mask_arr] = 0.
 
         # save the objective function value
         f_admm_evals.append(
