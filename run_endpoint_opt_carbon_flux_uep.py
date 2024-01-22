@@ -4,7 +4,7 @@ is called for UEP optimization.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Jan 19, 2024
+Last Modified : Jan 22, 2024
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -44,16 +44,16 @@ if __name__ == "__main__":
 
     # operational parameters
     LEP_OPT = False
-    MAX_ITERS = 2
+    MAX_ITERS = 10
     SUBOPT_ITERS = 12
-    MAXLS = 10        # max number of line search steps in w opt
+    MAXLS = 20        # max number of line search steps in w opt
     TIME_2_WAIT = 15  # seconds between each check for file existence
     MAX_EVAL_TIME = 60 * 60 * 24  # number of seconds to wait for for/adj eval
     YEAR = 2010
     MONTH_IDX = 9
     MU = 1e3  # penalty parameter enforcing feasibility
     READ_START_VECTORS = True  # read in previously saved w, c, and lambda vecs
-    START_IDX = 0  # should be 0 unless reading specific start vectors
+    START_IDX = 2  # should be 0 unless reading specific start vectors
 
     # define necessary directories
     HOME = '/glade/u/home/mcstanley'
@@ -157,9 +157,9 @@ if __name__ == "__main__":
 
     if READ_START_VECTORS:
         w_sp, c_sp, lambda_sp = read_starting_point(
-            w_fp=INT_START_DIR + '/w_start_from_neg_lep08.npy',
-            c_fp=INT_START_DIR + '/c_start_from_neg_lep08.npy',
-            lambda_fp=INT_START_DIR + '/lambda_start_from_neg_lep08.npy'
+            w_fp=INT_START_DIR + '/w_start_from_it2.npy',
+            c_fp=INT_START_DIR + '/c_start_from_it2.npy',
+            lambda_fp=INT_START_DIR + '/lambda_start_from_it2.npy'
         )
     else:
         w_sp, c_sp, lambda_sp = starting_point_generation(
@@ -201,5 +201,5 @@ if __name__ == "__main__":
     )
 
     # save the above output
-    with open(SAVE_DIR + '/final_results.pkl', 'wb') as f:
+    with open(SAVE_DIR + '/final_results_from_it2.pkl', 'wb') as f:
         pickle.dump(res_dict, f)
