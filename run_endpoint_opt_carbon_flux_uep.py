@@ -4,7 +4,7 @@ is called for UEP optimization.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Jan 30, 2024
+Last Modified : Feb 09, 2024
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -51,9 +51,9 @@ if __name__ == "__main__":
     MAX_EVAL_TIME = 60 * 60 * 24  # number of seconds to wait for for/adj eval
     YEAR = 2010
     MONTH_IDX = 9
-    MU = 1e3  # penalty parameter enforcing feasibility
+    MU = 1e4  # penalty parameter enforcing feasibility
     READ_START_VECTORS = True  # read in previously saved w, c, and lambda vecs
-    START_IDX = 4  # should be 0 unless reading specific start vectors
+    START_IDX = 0  # should be 0 unless reading specific start vectors
 
     # define necessary directories
     HOME = '/glade/u/home/mcstanley'
@@ -64,10 +64,10 @@ if __name__ == "__main__":
     SAT_OBS = WORK + '/Data/OSSE_OBS'
     GC_DIR = HOME + '/gc_adj_runs/forward_model_osb_uep'
     W_DIR = WORK + '/admm_objects/w_gen_dir_uep'
-    INT_START_DIR = WORK + '/admm_objects/results/11/intermediate_starts'
+    INT_START_DIR = WORK + '/admm_objects/results/12/intermediate_starts'
 
     # end result save location
-    SAVE_DIR = WORK + '/admm_objects/results/11'
+    SAVE_DIR = WORK + '/admm_objects/results/12'
 
     # define necessary file paths
     AFFINE_CORR_FP = WORK_P_FIX + '/affine_correction.npy'
@@ -157,9 +157,9 @@ if __name__ == "__main__":
 
     if READ_START_VECTORS:
         w_sp, c_sp, lambda_sp = read_starting_point(
-            w_fp=INT_START_DIR + '/w_start_from_it4.npy',
-            c_fp=INT_START_DIR + '/c_start_from_it4.npy',
-            lambda_fp=INT_START_DIR + '/lambda_start_from_it4.npy'
+            w_fp=INT_START_DIR + '/w_start_from11.npy',
+            c_fp=INT_START_DIR + '/c_start_from11.npy',
+            lambda_fp=INT_START_DIR + '/lambda_start_from11.npy'
         )
     else:
         w_sp, c_sp, lambda_sp = starting_point_generation(
@@ -201,5 +201,5 @@ if __name__ == "__main__":
     )
 
     # save the above output
-    with open(SAVE_DIR + '/final_results_from_it4.pkl', 'wb') as f:
+    with open(SAVE_DIR + '/final_results.pkl', 'wb') as f:
         pickle.dump(res_dict, f)
