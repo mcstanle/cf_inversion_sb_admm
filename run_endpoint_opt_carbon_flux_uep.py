@@ -4,7 +4,7 @@ is called for UEP optimization.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Feb 23, 2024
+Last Modified : Mar 11, 2024
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -64,10 +64,10 @@ if __name__ == "__main__":
     SAT_OBS = WORK + '/Data/OSSE_OBS'
     GC_DIR = HOME + '/gc_adj_runs/forward_model_osb_uep'
     W_DIR = WORK + '/admm_objects/w_gen_dir_uep'
-    INT_START_DIR = WORK + '/admm_objects/results/13/intermediate_starts'
+    INT_START_DIR = WORK + '/admm_objects/results/14/intermediate_starts'
 
     # end result save location
-    SAVE_DIR = WORK + '/admm_objects/results/13'
+    SAVE_DIR = WORK + '/admm_objects/results/14'
 
     # define necessary file paths
     AFFINE_CORR_FP = WORK_P_FIX + '/affine_correction.npy'
@@ -157,9 +157,9 @@ if __name__ == "__main__":
 
     if READ_START_VECTORS:
         w_sp, c_sp, lambda_sp = read_starting_point(
-            w_fp=INT_START_DIR + '/w_start_from_neg_lep08.npy',
-            c_fp=INT_START_DIR + '/c_start_from_neg_lep08.npy',
-            lambda_fp=INT_START_DIR + '/lambda_start_from_neg_lep08.npy'
+            w_fp=INT_START_DIR + '/w_start_from13.npy',
+            c_fp=INT_START_DIR + '/c_start_from13.npy',
+            lambda_fp=INT_START_DIR + '/lambda_start_from13.npy'
         )
     else:
         w_sp, c_sp, lambda_sp = starting_point_generation(
