@@ -21,7 +21,7 @@ TODO:
 ===============================================================================
 Author        : Mike Stanley
 Created       : May 24, 2023
-Last Modified : Jan 03, 2023
+Last Modified : Mar 17, 2024
 ===============================================================================
 """
 from functools import partial
@@ -34,6 +34,7 @@ from scipy.optimize import minimize
 def w_update_obj(
     w, lambda_k, c_k, mu_k, lep,
     psi_alpha, forward_eval, adjoint_eval,
+    jan_mask,
     y, A, b, h
 ):
     """
@@ -52,6 +53,8 @@ def w_update_obj(
         forward_eval (function) : NOTE: this does nothing here, but needs to
                                   have same structure as w_update_obj_grad()
         adjoint_eval (function) : returns K^T w, where K is lin. forward model
+        jan_mask     (bool)     : sets the jan inputs to the forward model to 1
+                                : NOTE: does nothing here -- matching format
         y            (np arr)   : m x 1
         A            (np arr)   : d x p
         b            (np arr)   : d x 1
@@ -77,6 +80,7 @@ def w_update_obj(
 def w_update_obj_grad(
     w, lambda_k, c_k, mu_k, lep,
     psi_alpha, forward_eval, adjoint_eval,
+    jan_mask,
     y, A, b, h
 ):
     """
@@ -94,6 +98,7 @@ def w_update_obj_grad(
         psi_alpha    (float)    :
         forward_eval (function) : returns Kx, where K is lin. forward model
         adjoint_eval (function) : returns K^T w, where K is lin. forward model
+        jan_mask     (bool)     : sets the jan inputs to the forward model to 1
         y            (np arr)   : m x 1
         A            (np arr)   : d x p
         b            (np arr)   : d x 1 -- NOTE not used here, for parallelism
@@ -111,6 +116,10 @@ def w_update_obj_grad(
     # construct input for forward model run
     f_model_input = lambda_k - mu_k * KTw + mu_k * h
     f_model_input -= lep_switch * mu_k * A.T @ c_k
+
+    # set january to 1s
+    if jan_mask:
+        f_model_input[:(46 * 72)] = 1.
 
     # evaluate the forward model
     Kx = forward_eval(f_model_input)
@@ -230,6 +239,9 @@ def run_admm(
     NOTE: for the mask_path functionality, we currently only support setting
     the mask values all to 0.
 
+    NOTE: if a mask path is given, that sets the variable jan_mask to True,
+    which affects the gradient function for the w optimization.
+
     Sub-optimization details
     1. w optimization is performed with L-BFGS-B
     2. c optimization is performed with L-BFGS-B
@@ -272,6 +284,9 @@ def run_admm(
     # set problem dimensions
     m = y.shape[0]
     d, p = A.shape
+
+    # set january mask
+    jan_mask = True if mask_path else False
 
     # data structures to save output
     f_admm_evals = []
@@ -328,6 +343,7 @@ def run_admm(
             args=(
                 lambda_k, c_k, mu, lep, psi_alpha,
                 forward_eval, adjoint_eval,
+                jan_mask,
                 y, A, b, h
             ),
             method='L-BFGS-B',
@@ -380,6 +396,9 @@ def run_admm(
 
         # dual variable update
         lambda_k += mu * (h - lep_switch * A.T @ c_k - KTwk1)
+
+        if jan_mask:
+            lambda_k[:(46 * 72)] = 1.
 
         # save the objective function value
         f_admm_evals.append(
