@@ -11,7 +11,7 @@ endpoint optimizations.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 16, 2023
-Last Modified : Aug 07, 2023
+Last Modified : Apr 01, 2024
 ===============================================================================
 """
 from carbonfluxtools.io_utils import create_gosat_df_year
@@ -68,7 +68,7 @@ def y_generation(aff_corr_fp, gosat_dir, write_fp, year=2010, month=9):
     return os.path.exists(write_fp)
 
 
-def A_b_generation(box_constraint_fp):
+def A_b_generation(box_constraint_fp, unity_indices=None):
     """
     Creates A and b objects using the box constraints previously found (see
     above).
@@ -78,12 +78,17 @@ def A_b_generation(box_constraint_fp):
     2. lower bounded (m)
     3. upper bounded (n)
 
+    With the unity_indices, these are the indices of the scaling factor vector
+    that should be held constant at 1.
+
     By convention, lower bounds come first in the rows of A
 
     Parameters
     ----------
-        box_constraint_fp (str) : file path to file containing box constraints
-                                  in tuples.
+        box_constraint_fp (str)    : file path to file containing box
+                                     constraints in tuples.
+        unity_indices     (np arr) : indices where scaling factors should be
+                                     held at 1.
 
     Returns
     -------
@@ -99,20 +104,41 @@ def A_b_generation(box_constraint_fp):
     lb_idxs = np.where(bnds[:, 0] > -np.inf)[0]
     ub_idxs = np.where(bnds[:, 1] < np.inf)[0]
     tot_constr_count = lb_idxs.shape[0] + ub_idxs.shape[0]
+    if unity_indices is not None:
+        tot_constr_count += 2 * unity_indices.shape[0]
 
-    # make output objects
     A = np.zeros(shape=(tot_constr_count, orig_dim))
     b = np.zeros(tot_constr_count)
 
     # lower bounds
-    for i, lb_idx_i in zip(range(lb_idxs.shape[0]), lb_idxs):
+    idx_lb = 0
+    idx_ub = lb_idxs.shape[0]
+    for i, lb_idx_i in zip(range(idx_lb, idx_ub), lb_idxs):
         A[i, lb_idx_i] = -1
         b[i] = - bnds[lb_idx_i, 0]
 
     # upper bounds
-    for i, ub_idx_i in zip(range(lb_idxs.shape[0], tot_constr_count), ub_idxs):
+    idx_lb = idx_ub
+    idx_ub = idx_lb + ub_idxs.shape[0]
+    for i, ub_idx_i in zip(range(idx_lb, idx_ub), ub_idxs):
         A[i, ub_idx_i] = 1
         b[i] = bnds[ub_idx_i, 1]
+
+    if unity_indices is not None:
+
+        # lower bounds
+        idx_lb = idx_ub
+        idx_ub = idx_lb + unity_indices.shape[0]
+        for i, unity_idx_i in zip(range(idx_lb, idx_ub), unity_indices):
+            A[i, unity_idx_i] = -1
+            b[i] = -1
+
+        # upper bounds
+        idx_lb = idx_ub
+        idx_ub = idx_lb + unity_indices.shape[0]
+        for i, unity_idx_i in zip(range(idx_lb, idx_ub), unity_indices):
+            A[i, unity_idx_i] = 1
+            b[i] = 1
 
     return A, b
 
