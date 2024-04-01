@@ -13,7 +13,7 @@ iteration.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Jan 03, 2023
+Last Modified : Apr 01, 2024
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -148,7 +148,8 @@ if __name__ == "__main__":
     # obtain A and b constraint objects
     CONSTR_DIR = HOME + '/strict_bounds/lbfgsb_optimizer/data/sign_corrected'
     A, b = A_b_generation(
-        box_constraint_fp=CONSTR_DIR + '/scipy_bnds.pkl'
+        box_constraint_fp=CONSTR_DIR + '/scipy_bnds.pkl',
+        unity_indices=np.arange(46 * 72)  # i.e., january indices
     )
     print('Constraints obtained.')
 
