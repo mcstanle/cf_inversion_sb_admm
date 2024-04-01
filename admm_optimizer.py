@@ -118,8 +118,8 @@ def w_update_obj_grad(
     f_model_input -= lep_switch * mu_k * A.T @ c_k
 
     # set january to 1s
-    if jan_mask:
-        f_model_input[:(46 * 72)] = 1.
+    # if jan_mask:
+    #     f_model_input[:(46 * 72)] = 1.
 
     # evaluate the forward model
     Kx = forward_eval(f_model_input)
@@ -397,8 +397,8 @@ def run_admm(
         # dual variable update
         lambda_k += mu * (h - lep_switch * A.T @ c_k - KTwk1)
 
-        if jan_mask:
-            lambda_k[:(46 * 72)] = 1.
+        # if jan_mask:
+        #     lambda_k[:(46 * 72)] = 1.
 
         # save the objective function value
         f_admm_evals.append(

@@ -64,10 +64,10 @@ if __name__ == "__main__":
     SAT_OBS = WORK + '/Data/OSSE_OBS'
     GC_DIR = HOME + '/gc_adj_runs/forward_model_osb_uep'
     W_DIR = WORK + '/admm_objects/w_gen_dir_uep'
-    INT_START_DIR = WORK + '/admm_objects/results/15/intermediate_starts'
+    INT_START_DIR = WORK + '/admm_objects/results/16/intermediate_starts'
 
     # end result save location
-    SAVE_DIR = WORK + '/admm_objects/results/15'
+    SAVE_DIR = WORK + '/admm_objects/results/16'
 
     # define necessary file paths
     AFFINE_CORR_FP = WORK_P_FIX + '/affine_correction.npy'
@@ -158,8 +158,8 @@ if __name__ == "__main__":
 
     if READ_START_VECTORS:
         w_sp, c_sp, lambda_sp = read_starting_point(
-            w_fp=INT_START_DIR + '/w_start_from14.npy',
-            c_fp=INT_START_DIR + '/c_start_from14.npy',
+            w_fp=INT_START_DIR + '/w_start_fromLEP.npy',
+            c_fp=INT_START_DIR + '/c_start_active0.npy',
             lambda_fp=INT_START_DIR + '/lambda_start_unity.npy'
         )
     else:
