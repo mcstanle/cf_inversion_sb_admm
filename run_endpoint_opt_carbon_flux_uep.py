@@ -4,7 +4,7 @@ is called for UEP optimization.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Apr 01, 2024
+Last Modified : Apr 16, 2024
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -64,10 +64,10 @@ if __name__ == "__main__":
     SAT_OBS = WORK + '/Data/OSSE_OBS'
     GC_DIR = HOME + '/gc_adj_runs/forward_model_osb_uep'
     W_DIR = WORK + '/admm_objects/w_gen_dir_uep'
-    INT_START_DIR = WORK + '/admm_objects/results/16/intermediate_starts'
+    INT_START_DIR = WORK + '/admm_objects/results/17/intermediate_starts'
 
     # end result save location
-    SAVE_DIR = WORK + '/admm_objects/results/16'
+    SAVE_DIR = WORK + '/admm_objects/results/17'
 
     # define necessary file paths
     AFFINE_CORR_FP = WORK_P_FIX + '/affine_correction.npy'
@@ -140,7 +140,8 @@ if __name__ == "__main__":
     CONSTR_DIR = HOME + '/strict_bounds/lbfgsb_optimizer/data/sign_corrected'
     A, b = A_b_generation(
         box_constraint_fp=CONSTR_DIR + '/scipy_bnds.pkl',
-        unity_indices=np.arange(46 * 72)  # i.e., january indices
+        unity_indices=np.arange(46 * 72),  # i.e., january indices
+        percent_dev=0.5
     )
     print('Constraints obtained.')
 

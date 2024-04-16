@@ -11,7 +11,7 @@ endpoint optimizations.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 16, 2023
-Last Modified : Apr 01, 2024
+Last Modified : Apr 16, 2024
 ===============================================================================
 """
 from carbonfluxtools.io_utils import create_gosat_df_year
@@ -68,7 +68,7 @@ def y_generation(aff_corr_fp, gosat_dir, write_fp, year=2010, month=9):
     return os.path.exists(write_fp)
 
 
-def A_b_generation(box_constraint_fp, unity_indices=None):
+def A_b_generation(box_constraint_fp, unity_indices=None, percent_dev=0.):
     """
     Creates A and b objects using the box constraints previously found (see
     above).
@@ -83,12 +83,17 @@ def A_b_generation(box_constraint_fp, unity_indices=None):
 
     By convention, lower bounds come first in the rows of A
 
+    NOTE: (Apr 16) The definition of "unity_indices" is updated to not strictly
+    mean x == 1, but rather x in [1 - percent_dev, 1 + percent_dev], where
+    percent_dev is the percent deviation from unity.
+
     Parameters
     ----------
         box_constraint_fp (str)    : file path to file containing box
                                      constraints in tuples.
         unity_indices     (np arr) : indices where scaling factors should be
                                      held at 1.
+        percent_dev       (float)  : percent deviation from unity (default 0)
 
     Returns
     -------
@@ -131,14 +136,14 @@ def A_b_generation(box_constraint_fp, unity_indices=None):
         idx_ub = idx_lb + unity_indices.shape[0]
         for i, unity_idx_i in zip(range(idx_lb, idx_ub), unity_indices):
             A[i, unity_idx_i] = -1
-            b[i] = -1
+            b[i] = -1 + percent_dev
 
         # upper bounds
         idx_lb = idx_ub
         idx_ub = idx_lb + unity_indices.shape[0]
         for i, unity_idx_i in zip(range(idx_lb, idx_ub), unity_indices):
             A[i, unity_idx_i] = 1
-            b[i] = 1
+            b[i] = 1 + percent_dev
 
     return A, b
 
