@@ -4,7 +4,7 @@ is called for UEP optimization.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Apr 16, 2024
+Last Modified : Apr 19, 2024
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -64,10 +64,10 @@ if __name__ == "__main__":
     SAT_OBS = WORK + '/Data/OSSE_OBS'
     GC_DIR = HOME + '/gc_adj_runs/forward_model_osb_uep'
     W_DIR = WORK + '/admm_objects/w_gen_dir_uep'
-    INT_START_DIR = WORK + '/admm_objects/results/17/intermediate_starts'
+    INT_START_DIR = WORK + '/admm_objects/results/18/intermediate_starts'
 
     # end result save location
-    SAVE_DIR = WORK + '/admm_objects/results/17'
+    SAVE_DIR = WORK + '/admm_objects/results/18'
 
     # define necessary file paths
     AFFINE_CORR_FP = WORK_P_FIX + '/affine_correction.npy'
@@ -147,7 +147,7 @@ if __name__ == "__main__":
 
     # import functional
     FUNC_FP = HOME + '/strict_bounds/lbfgsb_optimizer/data'
-    FUNC_FP += '/na_june_functional.npy'
+    FUNC_FP += '/wna_june_functional.npy'
     with open(FUNC_FP, 'rb') as f:
         h = np.load(f)
     print(f'Functional acquired from {FUNC_FP}')
