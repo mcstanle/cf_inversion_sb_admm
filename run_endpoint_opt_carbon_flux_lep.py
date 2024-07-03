@@ -13,7 +13,7 @@ iteration.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Apr 01, 2024
+Last Modified : Jul 03, 2024
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     INT_START_DIR = WORK + '/admm_objects/results/08/intermediate_starts'
 
     # end result save location
-    SAVE_DIR = WORK + '/admm_objects/results/08'
+    SAVE_DIR = WORK + '/admm_objects/results/19'
 
     # define necessary file paths
     AFFINE_CORR_FP = WORK_P_FIX + '/affine_correction.npy'
@@ -155,7 +155,7 @@ if __name__ == "__main__":
 
     # import functional
     FUNC_FP = HOME + '/strict_bounds/lbfgsb_optimizer/data'
-    FUNC_FP += '/na_june_functional.npy'
+    FUNC_FP += '/nh_june_functional.npy'
     with open(FUNC_FP, 'rb') as f:
         h = np.load(f)
     print(f'Functional acquired from {FUNC_FP}')
