@@ -13,7 +13,7 @@ iteration.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Jul 06, 2024
+Last Modified : Jul 15, 2024
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     MAX_EVAL_TIME = 60 * 60 * 24  # number of seconds to wait for for/adj eval
     YEAR = 2010
     MONTH_IDX = 9
-    MU = 1e3  # penalty parameter enforcing feasibility
+    MU = 1e4  # penalty parameter enforcing feasibility
     READ_START_VECTORS = True  # read in previously saved w, c, and lambda vecs
     START_IDX = 0  # should be 0 unless reading specific start vectors
 
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     INT_START_DIR = WORK + '/admm_objects/results/08/intermediate_starts'
 
     # end result save location
-    SAVE_DIR = WORK + '/admm_objects/results/19'
+    SAVE_DIR = WORK + '/admm_objects/results/20'
 
     # define necessary file paths
     AFFINE_CORR_FP = WORK_P_FIX + '/affine_correction.npy'
