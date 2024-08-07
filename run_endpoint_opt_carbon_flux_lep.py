@@ -13,7 +13,7 @@ iteration.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Jul 15, 2024
+Last Modified : Aug 06, 2024
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     SAT_OBS = WORK + '/Data/OSSE_OBS'
     GC_DIR = HOME + '/gc_adj_runs/forward_model_osb_lep'
     W_DIR = WORK + '/admm_objects/w_gen_dir_lep'
-    INT_START_DIR = WORK + '/admm_objects/results/08/intermediate_starts'
+    INT_START_DIR = WORK + '/admm_objects/results/20/intermediate_starts'
 
     # end result save location
     SAVE_DIR = WORK + '/admm_objects/results/20'
