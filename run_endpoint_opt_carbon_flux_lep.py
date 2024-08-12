@@ -13,7 +13,7 @@ iteration.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Aug 06, 2024
+Last Modified : Aug 11, 2024
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -57,12 +57,12 @@ if __name__ == "__main__":
     SUBOPT_ITERS = 12
     MAXLS = 10        # max number of line search steps in w opt
     TIME_2_WAIT = 15  # seconds between each check for file existence
-    MAX_EVAL_TIME = 60 * 60 * 24  # number of seconds to wait for for/adj eval
+    MAX_EVAL_TIME = 60 * 60 * 36  # number of seconds to wait for for/adj eval
     YEAR = 2010
     MONTH_IDX = 9
     MU = 1e4  # penalty parameter enforcing feasibility
     READ_START_VECTORS = True  # read in previously saved w, c, and lambda vecs
-    START_IDX = 0  # should be 0 unless reading specific start vectors
+    START_IDX = 3  # should be 0 unless reading specific start vectors
 
     # define necessary directories
     HOME = '/glade/u/home/mcstanley'
@@ -167,9 +167,9 @@ if __name__ == "__main__":
 
     if READ_START_VECTORS:
         w_sp, c_sp, lambda_sp = read_starting_point(
-            w_fp=INT_START_DIR + '/w_start_it0.npy',
-            c_fp=INT_START_DIR + '/c_start_it0.npy',
-            lambda_fp=INT_START_DIR + '/lambda_start_it0.npy'
+            w_fp=INT_START_DIR + '/w_start_it2.npy',
+            c_fp=INT_START_DIR + '/c_start_it2.npy',
+            lambda_fp=INT_START_DIR + '/lambda_start_it2.npy'
         )
     else:
         w_sp, c_sp, lambda_sp = starting_point_generation(
