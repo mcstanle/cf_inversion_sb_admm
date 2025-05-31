@@ -13,7 +13,7 @@ iteration.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : May 19, 2025
+Last Modified : May 31, 2025
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -60,9 +60,9 @@ if __name__ == "__main__":
     MAX_EVAL_TIME = 60 * 60 * 36  # number of seconds to wait for for/adj eval
     YEAR = 2010
     MONTH_IDX = 9
-    MU = 1e4  # penalty parameter enforcing feasibility
+    MU = 1e6  # penalty parameter enforcing feasibility
     READ_START_VECTORS = True  # read in previously saved w, c, and lambda vecs
-    START_IDX = 4  # should be 0 unless reading specific start vectors
+    START_IDX = 0  # should be 0 unless reading specific start vectors
 
     # define necessary directories
     HOME = '/glade/u/home/mcstanley'
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     INT_START_DIR = WORK + '/admm_objects/results/20/intermediate_starts'
 
     # end result save location
-    SAVE_DIR = WORK + '/admm_objects/results/20'
+    SAVE_DIR = WORK + '/admm_objects/results/21'
 
     # define necessary file paths
     AFFINE_CORR_FP = WORK_P_FIX + '/affine_correction.npy'
@@ -167,9 +167,9 @@ if __name__ == "__main__":
 
     if READ_START_VECTORS:
         w_sp, c_sp, lambda_sp = read_starting_point(
-            w_fp=INT_START_DIR + '/w_start_it4.npy',
-            c_fp=INT_START_DIR + '/c_start_it4.npy',
-            lambda_fp=INT_START_DIR + '/lambda_start_it4.npy'
+            w_fp=INT_START_DIR + '/w_start_it0.npy',
+            c_fp=INT_START_DIR + '/c_start_it0.npy',
+            lambda_fp=INT_START_DIR + '/lambda_start_it0.npy'
         )
     else:
         w_sp, c_sp, lambda_sp = starting_point_generation(
