@@ -1,10 +1,13 @@
 """
 Script to kick off optimization jobs for the carbon flux problem. This script
 is called for UEP optimization.
+
+NOTE: repurposed to run the LEP optimization so that two LEP optimizations
+can be simultaneously run.
 ===============================================================================
 Author        : Mike Stanley
 Created       : Jun 15, 2023
-Last Modified : Apr 20, 2024
+Last Modified : Jun 19, 2025
 ===============================================================================
 """
 from admm_optimizer import run_admm
@@ -43,12 +46,12 @@ def check_directories(sat_obs, save_dir):
 if __name__ == "__main__":
 
     # operational parameters
-    LEP_OPT = False
+    LEP_OPT = True
     MAX_ITERS = 10
     SUBOPT_ITERS = 12
     MAXLS = 20        # max number of line search steps in w opt
     TIME_2_WAIT = 15  # seconds between each check for file existence
-    MAX_EVAL_TIME = 60 * 60 * 24  # number of seconds to wait for for/adj eval
+    MAX_EVAL_TIME = 60 * 60 * 36  # number of seconds to wait for for/adj eval
     YEAR = 2010
     MONTH_IDX = 9
     MU = 1e4  # penalty parameter enforcing feasibility
@@ -64,10 +67,10 @@ if __name__ == "__main__":
     SAT_OBS = WORK + '/Data/OSSE_OBS'
     GC_DIR = HOME + '/gc_adj_runs/forward_model_osb_uep'
     W_DIR = WORK + '/admm_objects/w_gen_dir_uep'
-    INT_START_DIR = WORK + '/admm_objects/results/18/intermediate_starts'
+    INT_START_DIR = WORK + '/admm_objects/results/23/intermediate_starts'
 
     # end result save location
-    SAVE_DIR = WORK + '/admm_objects/results/18'
+    SAVE_DIR = WORK + '/admm_objects/results/23'
 
     # define necessary file paths
     AFFINE_CORR_FP = WORK_P_FIX + '/affine_correction.npy'
@@ -147,7 +150,7 @@ if __name__ == "__main__":
 
     # import functional
     FUNC_FP = HOME + '/strict_bounds/lbfgsb_optimizer/data'
-    FUNC_FP += '/wna_june_functional.npy'
+    FUNC_FP += '/na_june_functional.npy'
     with open(FUNC_FP, 'rb') as f:
         h = np.load(f)
     print(f'Functional acquired from {FUNC_FP}')
@@ -159,9 +162,9 @@ if __name__ == "__main__":
 
     if READ_START_VECTORS:
         w_sp, c_sp, lambda_sp = read_starting_point(
-            w_fp=INT_START_DIR + '/w_start_fromLEP.npy',
-            c_fp=INT_START_DIR + '/c_start_active0.npy',
-            lambda_fp=INT_START_DIR + '/lambda_start_unity.npy'
+            w_fp=INT_START_DIR + '/w_start_it0.npy',
+            c_fp=INT_START_DIR + '/c_start_it0.npy',
+            lambda_fp=INT_START_DIR + '/lambda_start_it0.npy'
         )
     else:
         w_sp, c_sp, lambda_sp = starting_point_generation(
